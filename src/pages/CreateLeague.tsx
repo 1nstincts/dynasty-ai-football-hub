@@ -8,9 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { aiService } from '../services/AIService';
+import { LeagueService } from '../services/LeagueService';
+import { useToast } from '@/components/ui/use-toast';
 
 const CreateLeague = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  
   const [step, setStep] = useState(1);
   const [leagueName, setLeagueName] = useState('');
   const [leagueType, setLeagueType] = useState('dynasty');
@@ -18,26 +22,15 @@ const CreateLeague = () => {
   const [scoringType, setScoringType] = useState('ppr');
   const [aiTeamCount, setAiTeamCount] = useState(11);
   const [aiStrategies, setAiStrategies] = useState<Record<number, string>>({});
+  const [isCreating, setIsCreating] = useState(false);
   
   const maxPlayers = leagueSize - 1; // Excluding the user's team
   
   const handleNext = () => {
-    if (step === 1) {
-      setStep(2);
-    } else if (step === 2) {
-      setStep(3);
+    if (step < 3) {
+      setStep(step + 1);
     } else {
-      // In a real app, this would dispatch an action to create a league
-      console.log('Creating league:', { 
-        leagueName, 
-        leagueType, 
-        leagueSize, 
-        scoringType,
-        aiTeamCount,
-        aiStrategies
-      });
-      
-      navigate('/');
+      handleCreateLeague();
     }
   };
 
@@ -52,6 +45,61 @@ const CreateLeague = () => {
       ...aiStrategies,
       [index]: strategy,
     });
+  };
+
+  const handleCreateLeague = async () => {
+    if (!leagueName.trim()) {
+      toast({
+        title: "League name required",
+        description: "Please enter a name for your league",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsCreating(true);
+    
+    try {
+      // Generate AI teams with names and strategies
+      const aiTeams = Array.from({ length: aiTeamCount }).map((_, index) => ({
+        name: `AI Team ${index + 1}`,
+        strategy: aiStrategies[index] || 'balanced'
+      }));
+      
+      // Create the league
+      const result = await LeagueService.createLeague({
+        name: leagueName,
+        type: leagueType,
+        size: leagueSize,
+        aiTeams
+      });
+      
+      if (result.success) {
+        toast({
+          title: "League Created!",
+          description: `Your league "${leagueName}" has been created successfully.`,
+          variant: "default",
+        });
+        
+        // Navigate to the new league
+        navigate(`/league/${result.leagueId}`);
+      } else {
+        toast({
+          title: "Error Creating League",
+          description: result.error || "Failed to create league. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error creating league:', error);
+      toast({
+        title: "Error Creating League",
+        description: "An unexpected error occurred. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   // Generate mock AI teams
@@ -231,11 +279,11 @@ const CreateLeague = () => {
           
           <div className="flex justify-between mt-6">
             {step > 1 ? (
-              <Button variant="outline" onClick={handleBack}>
+              <Button variant="outline" onClick={handleBack} disabled={isCreating}>
                 Back
               </Button>
             ) : (
-              <Button variant="outline" onClick={() => navigate('/')}>
+              <Button variant="outline" onClick={() => navigate('/')} disabled={isCreating}>
                 Cancel
               </Button>
             )}
@@ -243,8 +291,12 @@ const CreateLeague = () => {
             <Button 
               onClick={handleNext}
               className="bg-sleeper-accent text-sleeper-dark hover:bg-sleeper-accent/90"
+              disabled={isCreating}
             >
-              {step === 3 ? 'Create League' : 'Next'}
+              {isCreating ? 
+                "Creating..." : 
+                (step === 3 ? 'Create League' : 'Next')
+              }
             </Button>
           </div>
         </CardContent>
