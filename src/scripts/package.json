@@ -1,0 +1,16 @@
+
+{
+  "name": "dynasty-data-importer",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Fantasy football data importer for Supabase",
+  "main": "importData.js",
+  "scripts": {
+    "import": "node importData.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.7",
+    "csv-parse": "^5.5.4",
+    "node-fetch": "^3.3.2"
+  }
+}
