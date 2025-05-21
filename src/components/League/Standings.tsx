@@ -1,97 +1,73 @@
 
-import React from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { LeagueService } from '@/services/LeagueService';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/components/ui/use-toast';
 
 interface StandingTeam {
   id: string;
   name: string;
-  wins: number;
-  losses: number;
-  ties: number;
+  record: {
+    wins: number;
+    losses: number;
+    ties: number;
+  };
   pointsFor: number;
   pointsAgainst: number;
   avatar?: string;
 }
 
 const Standings: React.FC = () => {
-  // In a real app, we would fetch the standings from the store or API
+  const { leagueId } = useParams<{ leagueId: string }>();
+  const [standings, setStandings] = useState<StandingTeam[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
-  // Mock data for demonstration
-  const mockStandings: StandingTeam[] = [
-    {
-      id: '1', 
-      name: 'Russell\'s Daddy', 
-      wins: 0, 
-      losses: 0, 
-      ties: 0, 
-      pointsFor: 0, 
-      pointsAgainst: 0
-    },
-    {
-      id: '2', 
-      name: 'russellwils6n', 
-      wins: 0, 
-      losses: 0, 
-      ties: 0, 
-      pointsFor: 0, 
-      pointsAgainst: 0
-    },
-    {
-      id: '3', 
-      name: 'Nick is Corrupt', 
-      wins: 0, 
-      losses: 0, 
-      ties: 0, 
-      pointsFor: 0, 
-      pointsAgainst: 0
-    },
-    {
-      id: '4', 
-      name: 'Team cstu790', 
-      wins: 0, 
-      losses: 0, 
-      ties: 0, 
-      pointsFor: 0, 
-      pointsAgainst: 0
-    },
-    {
-      id: '5', 
-      name: 'Team asorial', 
-      wins: 0, 
-      losses: 0, 
-      ties: 0, 
-      pointsFor: 0, 
-      pointsAgainst: 0
-    },
-    {
-      id: '6', 
-      name: 'kaiser permanente', 
-      wins: 0, 
-      losses: 0, 
-      ties: 0, 
-      pointsFor: 0, 
-      pointsAgainst: 0
-    },
-    {
-      id: '7', 
-      name: 'Drake and Josh', 
-      wins: 0, 
-      losses: 0, 
-      ties: 0, 
-      pointsFor: 0, 
-      pointsAgainst: 0
-    },
-    {
-      id: '8', 
-      name: 'Touchdown There', 
-      wins: 0, 
-      losses: 0, 
-      ties: 0, 
-      pointsFor: 0, 
-      pointsAgainst: 0
-    },
-  ];
+  // Ensure leagueId is always a string
+  const safeLeagueId = leagueId || '1';
+
+  useEffect(() => {
+    const fetchStandings = async () => {
+      setIsLoading(true);
+      try {
+        const data = await LeagueService.getStandings(safeLeagueId);
+        setStandings(data);
+      } catch (error) {
+        console.error("Failed to fetch standings:", error);
+        toast({
+          title: "Error Loading Standings",
+          description: "Could not load league standings.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStandings();
+  }, [safeLeagueId, toast]);
+
+  if (isLoading) {
+    return (
+      <div className="p-4">
+        <h2 className="text-xl font-bold mb-4">Standings</h2>
+        <div className="fantasy-card">
+          {Array(8).fill(0).map((_, i) => (
+            <div key={i} className="player-row grid grid-cols-12">
+              <Skeleton className="col-span-1 h-6 w-8" />
+              <Skeleton className="col-span-6 h-6" />
+              <Skeleton className="col-span-1 h-6 w-8" />
+              <Skeleton className="col-span-1 h-6 w-8" />
+              <Skeleton className="col-span-1 h-6 w-8" />
+              <Skeleton className="col-span-1 h-6 w-8" />
+              <Skeleton className="col-span-1 h-6 w-8" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4">
@@ -108,7 +84,7 @@ const Standings: React.FC = () => {
           <div className="col-span-1 text-center">PA</div>
         </div>
 
-        {mockStandings.map((team, index) => (
+        {standings.map((team, index) => (
           <div key={team.id} className="player-row grid grid-cols-12">
             <div className="col-span-1 flex items-center">
               {index + 1}
@@ -119,9 +95,9 @@ const Standings: React.FC = () => {
               </div>
               <span className="font-medium">{team.name}</span>
             </div>
-            <div className="col-span-1 text-center">{team.wins}</div>
-            <div className="col-span-1 text-center">{team.losses}</div>
-            <div className="col-span-1 text-center">{team.ties}</div>
+            <div className="col-span-1 text-center">{team.record.wins}</div>
+            <div className="col-span-1 text-center">{team.record.losses}</div>
+            <div className="col-span-1 text-center">{team.record.ties}</div>
             <div className="col-span-1 text-center">{team.pointsFor}</div>
             <div className="col-span-1 text-center">{team.pointsAgainst}</div>
           </div>

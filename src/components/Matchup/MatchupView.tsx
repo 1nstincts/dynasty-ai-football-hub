@@ -1,8 +1,10 @@
 
-import React from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { MatchupService } from '@/services/MatchupService';
+import { Matchup } from '@/store/slices/matchupsSlice';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/components/ui/use-toast';
 
 interface MatchupViewProps {
   leagueId: string;
@@ -11,9 +13,36 @@ interface MatchupViewProps {
 }
 
 const MatchupView: React.FC<MatchupViewProps> = ({ leagueId, week, onChangeWeek }) => {
-  const matchups = useSelector((state: RootState) => 
-    state.matchups.matchups.filter(m => m.leagueId === leagueId && m.week === week)
-  );
+  const [matchups, setMatchups] = useState<Matchup[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [maxWeek, setMaxWeek] = useState(17); // Default to 17 weeks
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchMatchups = async () => {
+      setIsLoading(true);
+      try {
+        // Get the current week from our service (based on real data)
+        const currentWeek = await MatchupService.getCurrentWeek();
+        setMaxWeek(currentWeek);
+        
+        // Get matchups for the specified week
+        const data = await MatchupService.getMatchups(leagueId, week);
+        setMatchups(data);
+      } catch (error) {
+        console.error("Failed to fetch matchups:", error);
+        toast({
+          title: "Error Loading Matchups",
+          description: "Could not load matchups data.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMatchups();
+  }, [leagueId, week, toast]);
 
   const handlePreviousWeek = () => {
     if (week > 1) {
@@ -22,11 +51,53 @@ const MatchupView: React.FC<MatchupViewProps> = ({ leagueId, week, onChangeWeek 
   };
 
   const handleNextWeek = () => {
-    // Assume 17 weeks in a season
-    if (week < 17) {
+    if (week < maxWeek) {
       onChangeWeek(week + 1);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">Matchups</h2>
+          <div className="flex items-center space-x-2">
+            <button 
+              onClick={handlePreviousWeek} 
+              disabled={week <= 1}
+              className="p-1 rounded hover:bg-sleeper-dark disabled:opacity-50"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <span className="font-medium">
+              Week {week}
+            </span>
+            <button 
+              onClick={handleNextWeek} 
+              disabled={week >= maxWeek}
+              className="p-1 rounded hover:bg-sleeper-dark disabled:opacity-50"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {Array(3).fill(0).map((_, index) => (
+            <div key={index} className="fantasy-card">
+              <div className="flex justify-between p-4">
+                <Skeleton className="h-12 w-1/3" />
+                <div className="flex items-center px-4">
+                  <Skeleton className="h-6 w-8" />
+                </div>
+                <Skeleton className="h-12 w-1/3" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4">
@@ -45,7 +116,7 @@ const MatchupView: React.FC<MatchupViewProps> = ({ leagueId, week, onChangeWeek 
           </span>
           <button 
             onClick={handleNextWeek} 
-            disabled={week >= 17}
+            disabled={week >= maxWeek}
             className="p-1 rounded hover:bg-sleeper-dark disabled:opacity-50"
           >
             <ChevronRight className="h-5 w-5" />
