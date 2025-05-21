@@ -9,7 +9,78 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      games: {
+        Row: {
+          away_team: string | null
+          created_at: string | null
+          game_id: string
+          gameday: string | null
+          home_team: string | null
+          season: number | null
+          week: number | null
+        }
+        Insert: {
+          away_team?: string | null
+          created_at?: string | null
+          game_id: string
+          gameday?: string | null
+          home_team?: string | null
+          season?: number | null
+          week?: number | null
+        }
+        Update: {
+          away_team?: string | null
+          created_at?: string | null
+          game_id?: string
+          gameday?: string | null
+          home_team?: string | null
+          season?: number | null
+          week?: number | null
+        }
+        Relationships: []
+      }
+      players: {
+        Row: {
+          birth_date: string | null
+          created_at: string | null
+          draft_pick: number | null
+          draft_round: number | null
+          draft_year: number | null
+          full_name: string | null
+          height: string | null
+          player_id: string
+          position: string | null
+          team: string | null
+          weight: number | null
+        }
+        Insert: {
+          birth_date?: string | null
+          created_at?: string | null
+          draft_pick?: number | null
+          draft_round?: number | null
+          draft_year?: number | null
+          full_name?: string | null
+          height?: string | null
+          player_id: string
+          position?: string | null
+          team?: string | null
+          weight?: number | null
+        }
+        Update: {
+          birth_date?: string | null
+          created_at?: string | null
+          draft_pick?: number | null
+          draft_round?: number | null
+          draft_year?: number | null
+          full_name?: string | null
+          height?: string | null
+          player_id?: string
+          position?: string | null
+          team?: string | null
+          weight?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

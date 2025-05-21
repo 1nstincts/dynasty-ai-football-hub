@@ -1,4 +1,6 @@
+
 import { Player } from '@/store/slices/playersSlice';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Service for fetching and managing player data
@@ -8,8 +10,31 @@ export class PlayerService {
    * Fetch all players
    */
   static async getAllPlayers(): Promise<Player[]> {
-    // Mock implementation - in a real app, this would call an API
-    return mockPlayers;
+    try {
+      const { data, error } = await supabase
+        .from('players')
+        .select('*');
+
+      if (error) {
+        console.error('Error fetching players:', error);
+        return mockPlayers; // Fallback to mock data if API fails
+      }
+
+      // Transform Supabase data to match our Player interface
+      return data.map(player => ({
+        id: player.player_id,
+        name: player.full_name || 'Unknown',
+        position: player.position || 'N/A',
+        team: player.team || 'N/A',
+        age: player.birth_date ? calculateAge(player.birth_date) : 0,
+        experience: player.draft_year ? (new Date().getFullYear() - player.draft_year) : 0,
+        stats: createDefaultStats(),
+        projections: createDefaultProjections()
+      }));
+    } catch (error) {
+      console.error('Failed to get players:', error);
+      return mockPlayers; // Fallback to mock data
+    }
   }
 
   /**
@@ -32,7 +57,50 @@ export class PlayerService {
   }
 }
 
-// Mock data for development
+// Helper function to calculate age from birth date
+function calculateAge(birthDateString: string): number {
+  const birthDate = new Date(birthDateString);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDifference = today.getMonth() - birthDate.getMonth();
+  
+  if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  
+  return age;
+}
+
+// Helper function to create default stats
+function createDefaultStats() {
+  return {
+    rushing: {
+      yards: 0,
+      touchdowns: 0,
+      attempts: 0
+    },
+    receiving: {
+      yards: 0,
+      touchdowns: 0,
+      receptions: 0,
+      targets: 0
+    },
+    passing: {
+      yards: 0,
+      touchdowns: 0,
+      interceptions: 0,
+      completions: 0,
+      attempts: 0
+    }
+  };
+}
+
+// Helper function to create default projections
+function createDefaultProjections() {
+  return createDefaultStats();
+}
+
+// Mock data for development and fallback
 const mockPlayers: Player[] = [
   {
     id: "p1",
