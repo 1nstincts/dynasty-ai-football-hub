@@ -1,6 +1,20 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Team } from '@/store/slices/teamsSlice';
+
+// Define the Team interface since it's not exported from teamsSlice
+interface Team {
+  id: string;
+  name: string;
+  userId: string;
+  leagueId: string;
+  record: {
+    wins: number;
+    losses: number;
+    ties: number;
+  };
+  standings: number;
+  avatar?: string;
+}
 
 interface StandingTeam extends Team {
   pointsFor: number;

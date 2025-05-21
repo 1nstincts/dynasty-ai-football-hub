@@ -5,17 +5,21 @@ import { LeagueService } from '@/services/LeagueService';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
 
+// Define StandingTeam interface matching the one in LeagueService
 interface StandingTeam {
   id: string;
   name: string;
+  userId: string;
+  leagueId: string;
   record: {
     wins: number;
     losses: number;
     ties: number;
   };
+  standings: number;
+  avatar?: string;
   pointsFor: number;
   pointsAgainst: number;
-  avatar?: string;
 }
 
 const Standings: React.FC = () => {
@@ -32,7 +36,7 @@ const Standings: React.FC = () => {
       setIsLoading(true);
       try {
         const data = await LeagueService.getStandings(safeLeagueId);
-        setStandings(data);
+        setStandings(data as StandingTeam[]);
       } catch (error) {
         console.error("Failed to fetch standings:", error);
         toast({
