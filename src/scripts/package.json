@@ -6,7 +6,8 @@
   "description": "Fantasy football data importer for Supabase",
   "main": "importData.js",
   "scripts": {
-    "import": "node importData.js"
+    "import": "node importData.js",
+    "load:static": "node importData.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.7",
