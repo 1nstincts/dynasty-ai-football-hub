@@ -7,15 +7,21 @@ import TeamRoster from '../components/Team/TeamRoster';
 import MatchupView from '../components/Matchup/MatchupView';
 import LeagueChat from '../components/League/LeagueChat';
 import DataImportButton from '../components/Admin/DataImportButton';
+import StartupDraftSetup from '../components/Draft/StartupDraftSetup';
+import DraftRoom from '../components/Draft/DraftRoom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LeagueService } from '@/services/LeagueService';
+import { DraftService } from '@/services/DraftService';
 import { Skeleton } from '@/components/ui/skeleton';
+import { LeagueStatus } from '@/types/draft';
 
 const League = () => {
   const { leagueId } = useParams<{ leagueId: string }>();
   const [activeTab, setActiveTab] = useState('standings');
   const [currentWeek, setCurrentWeek] = useState(1);
   const [leagueName, setLeagueName] = useState<string | null>(null);
+  const [leagueStatus, setLeagueStatus] = useState<LeagueStatus | null>(null);
+  const [activeDraftId, setActiveDraftId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
   // Mock team ID for the user's team
@@ -28,32 +34,77 @@ const League = () => {
     setActiveTab(value);
   };
 
+  const handleStartDraft = (draftId: string) => {
+    setActiveDraftId(draftId);
+    setLeagueStatus(prev => prev ? { ...prev, currentPhase: 'draft', draftId } : null);
+  };
+
+  const handleDraftComplete = () => {
+    setActiveDraftId(null);
+    setLeagueStatus(prev => prev ? { ...prev, currentPhase: 'active', hasDrafted: true } : null);
+  };
+
   useEffect(() => {
-    const fetchLeagueDetails = async () => {
+    const fetchLeagueData = async () => {
       setIsLoading(true);
       try {
-        const leagueDetails = await LeagueService.getLeagueDetails(safeLeagueId);
+        // Fetch league details and status
+        const [leagueDetails, status] = await Promise.all([
+          LeagueService.getLeagueDetails(safeLeagueId),
+          DraftService.getLeagueStatus(safeLeagueId)
+        ]);
+
         if (leagueDetails) {
           setLeagueName(leagueDetails.name);
         }
+        
+        setLeagueStatus(status);
       } catch (error) {
-        console.error("Failed to fetch league details:", error);
+        console.error("Failed to fetch league data:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchLeagueDetails();
+    fetchLeagueData();
   }, [safeLeagueId]);
   
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-4">
+        <Skeleton className="h-8 w-64 mb-4" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
+  // Show draft setup if league hasn't drafted yet
+  if (leagueStatus?.currentPhase === 'setup' && !leagueStatus.hasDrafted) {
+    return (
+      <StartupDraftSetup
+        leagueId={safeLeagueId}
+        leagueSize={8} // This should come from league details
+        onStartDraft={handleStartDraft}
+      />
+    );
+  }
+
+  // Show active draft room
+  if (leagueStatus?.currentPhase === 'draft' && activeDraftId) {
+    return (
+      <DraftRoom
+        draftId={activeDraftId}
+        onDraftComplete={handleDraftComplete}
+      />
+    );
+  }
+
+  // Show normal league interface after draft is complete
   return (
     <div className="container mx-auto p-4">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-        {isLoading ? (
-          <Skeleton className="h-8 w-64" />
-        ) : (
-          <h1 className="text-2xl font-bold">{leagueName || `League ${safeLeagueId}`}</h1>
-        )}
+        <h1 className="text-2xl font-bold">{leagueName || `League ${safeLeagueId}`}</h1>
         <div className="flex gap-2">
           <LeagueNavigation activeTab={activeTab} onChange={handleTabChange} />
           <DataImportButton />
