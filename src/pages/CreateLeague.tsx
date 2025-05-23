@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -10,9 +11,11 @@ import { Slider } from '@/components/ui/slider';
 import { aiService } from '../services/AIService';
 import { LeagueService } from '../services/LeagueService';
 import { useToast } from '@/components/ui/use-toast';
+import { addLeague } from '@/store/slices/leaguesSlice';
 
 const CreateLeague = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { toast } = useToast();
   
   const [step, setStep] = useState(1);
@@ -72,9 +75,14 @@ const CreateLeague = () => {
         type: leagueType,
         size: leagueSize,
         aiTeams
-      });
+      }, 'temp-user'); // In a real app, get the actual user ID
       
       if (result.success) {
+        // Add the league to Redux store
+        if (result.league) {
+          dispatch(addLeague(result.league));
+        }
+        
         toast({
           title: "League Created!",
           description: `Your league "${leagueName}" has been created successfully.`,

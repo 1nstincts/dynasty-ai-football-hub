@@ -22,7 +22,7 @@ const Dashboard = () => {
     const fetchLeagues = async () => {
       dispatch(setLoading(true));
       try {
-        const leaguesData = await LeagueService.getUserLeagues();
+        const leaguesData = await LeagueService.getUserLeagues('temp-user'); // In a real app, get the actual user ID
         dispatch(setLeagues(leaguesData));
       } catch (error) {
         console.error('Failed to fetch leagues:', error);
@@ -38,6 +38,22 @@ const Dashboard = () => {
 
     fetchLeagues();
   }, [dispatch, toast]);
+
+  // Re-fetch leagues when component mounts (e.g., returning from create league)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        const fetchLeagues = async () => {
+          const leaguesData = await LeagueService.getUserLeagues('temp-user');
+          dispatch(setLeagues(leaguesData));
+        };
+        fetchLeagues();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [dispatch]);
 
   const handleCreateLeague = () => {
     navigate('/create-league');
