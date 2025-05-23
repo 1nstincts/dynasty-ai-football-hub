@@ -64,14 +64,14 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				sleeper: {
-					primary: '#9b87f5',
-					secondary: '#7E69AB',
-					dark: '#1A1F2C',
-					darker: '#141821',
-					accent: '#00ceb8',
-					highlight: '#33C3F0',
+					primary: '#ef4444',
+					secondary: '#dc2626',
+					dark: '#2c1410',
+					darker: '#1f0f0a',
+					accent: '#f97316',
+					highlight: '#fb923c',
 					gray: '#8E9196',
-					charcoal: '#403E43',
+					charcoal: '#431f1a',
 					black: '#222222'
 				}
 			},
