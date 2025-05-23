@@ -4,6 +4,9 @@ import { useParams } from 'react-router-dom';
 import { LeagueService } from '@/services/LeagueService';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
+import { shouldDisplayStandings, getSeasonStatusMessage, formatSeasonDate, getNextSeasonStart, getCurrentSeasonInfo } from '@/lib/seasonUtils';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Calendar, Clock } from 'lucide-react';
 
 // Define StandingTeam interface matching the one in LeagueService
 interface StandingTeam {
@@ -30,8 +33,20 @@ const Standings: React.FC = () => {
 
   // Ensure leagueId is always a string
   const safeLeagueId = leagueId || '1';
+  
+  // Get season information
+  const seasonInfo = getCurrentSeasonInfo();
+  const showStandings = shouldDisplayStandings();
+  const statusMessage = getSeasonStatusMessage();
+  const nextSeasonStart = getNextSeasonStart();
 
   useEffect(() => {
+    // Only fetch standings if the season has started
+    if (!showStandings) {
+      setIsLoading(false);
+      return;
+    }
+
     const fetchStandings = async () => {
       setIsLoading(true);
       try {
@@ -50,9 +65,9 @@ const Standings: React.FC = () => {
     };
 
     fetchStandings();
-  }, [safeLeagueId, toast]);
+  }, [safeLeagueId, toast, showStandings]);
 
-  if (isLoading) {
+  if (isLoading && showStandings) {
     return (
       <div className="p-4">
         <h2 className="text-xl font-bold mb-4">Standings</h2>
@@ -73,9 +88,61 @@ const Standings: React.FC = () => {
     );
   }
 
+  // Show season status message when standings shouldn't be displayed
+  if (!showStandings) {
+    return (
+      <div className="p-4">
+        <h2 className="text-xl font-bold mb-4">Standings</h2>
+        
+        <Card className="bg-sleeper-dark border-sleeper-dark">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              {seasonInfo.status === 'offseason' ? (
+                <Calendar className="h-12 w-12 text-sleeper-accent" />
+              ) : (
+                <Clock className="h-12 w-12 text-sleeper-accent" />
+              )}
+            </div>
+            <CardTitle className="text-lg text-sleeper-gray">
+              Standings Not Available
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <p className="text-sleeper-gray">
+              {statusMessage}
+            </p>
+            
+            {!seasonInfo.hasStarted && (
+              <div className="bg-sleeper-darker rounded-lg p-4">
+                <div className="flex items-center justify-center mb-2">
+                  <Calendar className="h-5 w-5 text-sleeper-accent mr-2" />
+                  <span className="font-semibold">Next Season Starts</span>
+                </div>
+                <p className="text-lg text-sleeper-accent font-bold">
+                  {formatSeasonDate(nextSeasonStart)}
+                </p>
+              </div>
+            )}
+            
+            <div className="text-sm text-sleeper-gray space-y-2">
+              <p>• Dynasty leagues: Manage your roster year-round</p>
+              <p>• Player values and trades remain active</p>
+              <p>• Prepare for the upcoming season!</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Standings</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-bold">Standings</h2>
+        <div className="text-sm text-sleeper-accent">
+          {seasonInfo.year} Season • {seasonInfo.status.charAt(0).toUpperCase() + seasonInfo.status.slice(1)}
+        </div>
+      </div>
 
       <div className="fantasy-card">
         <div className="text-xs text-sleeper-gray px-4 py-2 border-b border-sleeper-dark grid grid-cols-12">

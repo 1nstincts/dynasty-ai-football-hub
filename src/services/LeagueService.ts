@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { shouldDisplayStandings } from '@/lib/seasonUtils';
 
 // Define the Team interface since it's not exported from teamsSlice
 interface Team {
@@ -96,6 +97,12 @@ export class LeagueService {
    */
   static async getStandings(leagueId: string): Promise<StandingTeam[]> {
     try {
+      // Check if standings should be displayed based on NFL season timing
+      if (!shouldDisplayStandings()) {
+        console.log('Standings not available - NFL season has not started yet');
+        return [];
+      }
+
       // In a real implementation, we would fetch this from Supabase
       // For now, we'll fetch players from the database to confirm it's working
       // And construct mock standings using actual player data
