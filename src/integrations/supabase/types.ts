@@ -85,6 +85,9 @@ export type Database = {
           position: string | null
           team: string | null
           weight: number | null
+          adp: number | null
+          dynasty_adp: number | null
+          is_active: boolean | null
         }
         Insert: {
           birth_date?: string | null
@@ -98,6 +101,9 @@ export type Database = {
           position?: string | null
           team?: string | null
           weight?: number | null
+          adp?: number | null
+          dynasty_adp?: number | null
+          is_active?: boolean | null
         }
         Update: {
           birth_date?: string | null
@@ -111,6 +117,9 @@ export type Database = {
           position?: string | null
           team?: string | null
           weight?: number | null
+          adp?: number | null
+          dynasty_adp?: number | null
+          is_active?: boolean | null
         }
         Relationships: []
       }

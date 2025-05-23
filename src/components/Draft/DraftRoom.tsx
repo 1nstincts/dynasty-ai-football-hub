@@ -27,31 +27,60 @@ const DraftRoom: React.FC<DraftRoomProps> = ({ draftId, onDraftComplete }) => {
   useEffect(() => {
     const loadDraftData = async () => {
       try {
-        // In a real implementation, this would load actual draft data
-        const players = await DraftService.getDraftablePlayers();
-        setAvailablePlayers(players);
-        setFilteredPlayers(players);
+        // Load players and existing picks
+        const [players, existingPicks] = await Promise.all([
+          DraftService.getDraftablePlayers(draftId),
+          DraftService.getDraftPicks(draftId)
+        ]);
         
-        // Mock draft for demonstration
+        setAvailablePlayers(players);
+        setFilteredPlayers(players.filter(p => !p.isDrafted));
+        
+        // Create mock draft state - in real implementation this would be stored
+        const leagueSize = 8; // This should come from league settings
+        const rounds = 16;
+        const draftOrder = Array.from({ length: leagueSize }, (_, i) => 
+          i === 0 ? 'user-team' : `ai-team-${i}`
+        );
+        
+        const currentOverallPick = existingPicks.length + 1;
+        const currentRound = Math.ceil(currentOverallPick / leagueSize);
+        const pickInRound = ((currentOverallPick - 1) % leagueSize) + 1;
+        
+        // Determine current team (snake draft logic)
+        let currentTeamIndex;
+        if (currentRound % 2 === 1) {
+          // Odd rounds: normal order
+          currentTeamIndex = pickInRound - 1;
+        } else {
+          // Even rounds: reverse order
+          currentTeamIndex = leagueSize - pickInRound;
+        }
+        
         const mockDraft: Draft = {
           id: draftId,
           leagueId: 'league-1',
-          status: 'in_progress',
-          currentPick: 1,
-          currentRound: 1,
-          currentTeamId: 'user-team',
+          status: currentOverallPick > (leagueSize * rounds) ? 'completed' : 'in_progress',
+          currentPick: currentOverallPick,
+          currentRound,
+          currentTeamId: draftOrder[currentTeamIndex],
           settings: {
-            rounds: 16,
+            rounds,
             pickTimeLimit: 90,
-            draftOrder: ['user-team', 'ai-team-1', 'ai-team-2'],
+            draftOrder,
             randomizeDraftOrder: true,
             snakeDraft: true,
           },
-          picks: [],
+          picks: existingPicks,
         };
         
         setDraft(mockDraft);
         setTimeRemaining(mockDraft.settings.pickTimeLimit);
+        
+        // If draft is complete, notify parent
+        if (mockDraft.status === 'completed') {
+          onDraftComplete();
+        }
       } catch (error) {
         console.error('Failed to load draft data:', error);
         toast({
@@ -65,7 +94,7 @@ const DraftRoom: React.FC<DraftRoomProps> = ({ draftId, onDraftComplete }) => {
     };
 
     loadDraftData();
-  }, [draftId, toast]);
+  }, [draftId, toast, onDraftComplete]);
 
   useEffect(() => {
     // Filter players based on search and position
@@ -104,14 +133,22 @@ const DraftRoom: React.FC<DraftRoomProps> = ({ draftId, onDraftComplete }) => {
 
       return () => clearInterval(timer);
     }
-  }, [draft, timeRemaining]);
+  }, [draft, timeRemaining]);\n\n  // AI auto-pick effect\n  useEffect(() => {\n    if (draft?.status === 'in_progress' && draft.currentTeamId !== 'user-team') {\n      // AI turn - auto pick after 2-5 seconds\n      const aiDelay = Math.random() * 3000 + 2000;\n      const aiTimer = setTimeout(async () => {\n        const recommendation = await DraftService.getAIRecommendation(\n          draft.id, \n          draft.currentTeamId, \n          availablePlayers,\n          draft.currentRound\n        );\n        \n        if (recommendation && !recommendation.isDrafted) {\n          await handlePlayerSelect(recommendation);\n        }\n      }, aiDelay);\n      \n      return () => clearTimeout(aiTimer);\n    }\n  }, [draft?.currentTeamId, draft?.currentPick, availablePlayers]);
 
   const handlePlayerSelect = async (player: DraftablePlayer) => {
-    if (!draft) return;
+    if (!draft || player.isDrafted) return;
 
     try {
+      const currentRound = draft.currentRound;
+      const leagueSize = draft.settings.draftOrder.length;
+      const pickInRound = ((draft.currentPick - 1) % leagueSize) + 1;
+      
       // Make the pick
-      await DraftService.makePick(draft.id, player.player_id, draft.currentTeamId);
+      await DraftService.makePick(draft.id, player.player_id, draft.currentTeamId, {
+        round: currentRound,
+        pick: pickInRound,
+        overallPick: draft.currentPick
+      });
       
       toast({
         title: "Player Drafted!",
@@ -119,29 +156,14 @@ const DraftRoom: React.FC<DraftRoomProps> = ({ draftId, onDraftComplete }) => {
         variant: "default",
       });
 
-      // Update available players
-      setAvailablePlayers(prev => 
-        prev.map(p => 
-          p.player_id === player.player_id 
-            ? { ...p, isDrafted: true, draftedBy: draft.currentTeamId }
-            : p
-        )
-      );
-
-      // Move to next pick (simplified logic)
-      if (draft.currentPick >= draft.settings.draftOrder.length * draft.settings.rounds) {
-        // Draft complete
-        onDraftComplete();
-      } else {
-        // Next pick logic would go here
-        setTimeRemaining(draft.settings.pickTimeLimit);
-      }
+      // Reload draft data to get updated state
+      window.location.reload(); // Simple approach - in production would update state properly
 
     } catch (error) {
       console.error('Failed to make pick:', error);
       toast({
         title: "Draft Error",
-        description: "Failed to make pick. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to make pick. Please try again.",
         variant: "destructive",
       });
     }
@@ -154,7 +176,8 @@ const DraftRoom: React.FC<DraftRoomProps> = ({ draftId, onDraftComplete }) => {
       const recommendation = await DraftService.getAIRecommendation(
         draft.id, 
         draft.currentTeamId, 
-        availablePlayers
+        availablePlayers,
+        draft.currentRound
       );
 
       if (recommendation) {
@@ -270,25 +293,46 @@ const DraftRoom: React.FC<DraftRoomProps> = ({ draftId, onDraftComplete }) => {
             </CardHeader>
             <CardContent>
               <div className="space-y-2 max-h-96 overflow-y-auto">
-                {filteredPlayers.slice(0, 50).map(player => (
+                {filteredPlayers.slice(0, 100).map(player => (
                   <div
                     key={player.player_id}
-                    className="flex items-center justify-between p-3 border border-sleeper-darker rounded-lg hover:border-sleeper-accent transition-colors cursor-pointer"
-                    onClick={() => isUserTurn && handlePlayerSelect(player)}
+                    className={`flex items-center justify-between p-3 border rounded-lg transition-colors ${
+                      player.isDrafted 
+                        ? 'border-sleeper-darker bg-sleeper-darker/50 opacity-50 cursor-not-allowed'
+                        : isUserTurn 
+                          ? 'border-sleeper-darker hover:border-sleeper-accent cursor-pointer'
+                          : 'border-sleeper-darker cursor-not-allowed'
+                    }`}
+                    onClick={() => isUserTurn && !player.isDrafted && handlePlayerSelect(player)}
                   >
                     <div className="flex items-center gap-3">
-                      <Badge variant="outline" className="w-12 justify-center">
+                      <Badge 
+                        variant="outline" 
+                        className={`w-12 justify-center ${
+                          player.position === 'QB' ? 'bg-red-600 text-white' :
+                          player.position === 'RB' ? 'bg-green-600 text-white' :
+                          player.position === 'WR' ? 'bg-blue-600 text-white' :
+                          player.position === 'TE' ? 'bg-orange-600 text-white' :
+                          player.position === 'K' ? 'bg-purple-600 text-white' :
+                          'bg-yellow-600 text-black'
+                        }`}
+                      >
                         {player.position}
                       </Badge>
                       <div>
-                        <div className="font-semibold">{player.full_name}</div>
+                        <div className={`font-semibold ${player.isDrafted ? 'line-through' : ''}`}>
+                          {player.full_name}
+                        </div>
                         <div className="text-sm text-sleeper-gray">{player.team}</div>
+                        {player.isDrafted && (
+                          <div className="text-xs text-red-400">DRAFTED</div>
+                        )}
                       </div>
                     </div>
                     
                     <div className="text-right">
                       <div className="text-sm text-sleeper-gray">ADP</div>
-                      <div className="font-semibold">{Math.round(player.adp || 0)}</div>
+                      <div className="font-semibold">{Math.round(player.adp || 999)}</div>
                     </div>
                   </div>
                 ))}
@@ -313,18 +357,30 @@ const DraftRoom: React.FC<DraftRoomProps> = ({ draftId, onDraftComplete }) => {
               <div className="space-y-3">
                 {draft.picks.length === 0 ? (
                   <div className="text-center py-8 text-sleeper-gray">
-                    No picks yet
+                    Draft hasn't started yet
                   </div>
                 ) : (
                   draft.picks.slice(-10).reverse().map(pick => (
                     <div key={pick.id} className="flex justify-between items-center p-2 border border-sleeper-darker rounded">
                       <div>
                         <div className="font-semibold text-sm">{pick.playerName}</div>
-                        <div className="text-xs text-sleeper-gray">{pick.teamName}</div>
+                        <div className="text-xs text-sleeper-gray">
+                          {pick.isUserPick ? 'Your Team' : `AI Team ${pick.teamId.replace('ai-team-', '')}`}
+                        </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-xs text-sleeper-gray">R{pick.round}.{pick.pick}</div>
-                        <Badge variant="outline" className="text-xs">
+                        <div className="text-xs text-sleeper-gray">#{pick.overallPick}</div>
+                        <Badge 
+                          variant="outline" 
+                          className={`text-xs ${
+                            pick.position === 'QB' ? 'bg-red-600 text-white' :
+                            pick.position === 'RB' ? 'bg-green-600 text-white' :
+                            pick.position === 'WR' ? 'bg-blue-600 text-white' :
+                            pick.position === 'TE' ? 'bg-orange-600 text-white' :
+                            pick.position === 'K' ? 'bg-purple-600 text-white' :
+                            'bg-yellow-600 text-black'
+                          }`}
+                        >
                           {pick.position}
                         </Badge>
                       </div>

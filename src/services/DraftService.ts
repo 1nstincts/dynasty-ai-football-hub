@@ -23,26 +23,41 @@ export class DraftService {
   /**
    * Get all draftable players from the database
    */
-  static async getDraftablePlayers(): Promise<DraftablePlayer[]> {
+  static async getDraftablePlayers(draftId?: string): Promise<DraftablePlayer[]> {
     try {
+      // Get all active players
       const { data: players, error } = await supabase
         .from('players')
         .select('*')
-        .order('full_name');
+        .eq('is_active', true)
+        .order('dynasty_adp', { ascending: true, nullsLast: true });
 
       if (error) {
         console.error('Error fetching draftable players:', error);
         throw error;
       }
 
-      // Convert to DraftablePlayer format and add draft status
+      // Get already drafted players for this draft if draftId provided
+      let draftedPlayerIds: string[] = [];
+      if (draftId) {
+        const { data: draftPicks, error: draftError } = await supabase
+          .from('draft_picks')
+          .select('player_id')
+          .eq('draft_id', draftId);
+        
+        if (!draftError && draftPicks) {
+          draftedPlayerIds = draftPicks.map(pick => pick.player_id);
+        }
+      }
+
+      // Convert to DraftablePlayer format
       return players.map(player => ({
         player_id: player.player_id,
         full_name: player.full_name || 'Unknown Player',
         position: player.position || 'N/A',
         team: player.team || 'FA',
-        isDrafted: false,
-        adp: this.calculateMockADP(player.position, player.full_name),
+        isDrafted: draftedPlayerIds.includes(player.player_id),
+        adp: player.dynasty_adp || this.calculateMockADP(player.position, player.full_name),
       }));
     } catch (error) {
       console.error('Failed to get draftable players:', error);
@@ -159,34 +174,81 @@ export class DraftService {
   }
 
   /**
-   * Get draft by ID
+   * Get draft picks for a draft
    */
-  static async getDraft(draftId: string): Promise<Draft> {
+  static async getDraftPicks(draftId: string): Promise<DraftPick[]> {
     try {
-      // Mock implementation - in real app, fetch from database
-      throw new Error('Draft not found - this is a mock implementation');
+      const { data: picks, error } = await supabase
+        .from('draft_picks')
+        .select(`
+          *,
+          players!inner(full_name, position, team)
+        `)
+        .eq('draft_id', draftId)
+        .order('overall_pick');
+
+      if (error) {
+        console.error('Error fetching draft picks:', error);
+        throw error;
+      }
+
+      return picks.map(pick => ({
+        id: pick.id,
+        round: pick.round,
+        pick: pick.pick,
+        overallPick: pick.overall_pick,
+        teamId: pick.team_id,
+        teamName: `Team ${pick.team_id}`,
+        playerId: pick.player_id,
+        playerName: pick.players.full_name,
+        position: pick.players.position,
+        nflTeam: pick.players.team,
+        pickTime: pick.pick_time ? new Date(pick.pick_time) : undefined,
+        isUserPick: pick.team_id === 'user-team',
+      }));
     } catch (error) {
-      console.error('Failed to get draft:', error);
-      throw error;
+      console.error('Failed to get draft picks:', error);
+      return [];
     }
   }
 
   /**
    * Make a draft pick
    */
-  static async makePick(draftId: string, playerId: string, teamId: string): Promise<Draft> {
+  static async makePick(draftId: string, playerId: string, teamId: string, pickInfo: { round: number, pick: number, overallPick: number }): Promise<boolean> {
     try {
-      // In real implementation, this would:
-      // 1. Validate it's the correct team's turn
-      // 2. Validate player is available
-      // 3. Update the draft with the pick
-      // 4. Move to next pick
-      // 5. Trigger AI picks if needed
-      
-      console.log(`Team ${teamId} drafts player ${playerId} in draft ${draftId}`);
-      
-      // For now, return mock updated draft
-      throw new Error('Pick making not implemented yet - this is a mock');
+      // Check if player is already drafted
+      const { data: existingPick, error: checkError } = await supabase
+        .from('draft_picks')
+        .select('id')
+        .eq('draft_id', draftId)
+        .eq('player_id', playerId)
+        .single();
+
+      if (existingPick) {
+        throw new Error('Player already drafted');
+      }
+
+      // Make the pick
+      const { error: insertError } = await supabase
+        .from('draft_picks')
+        .insert({
+          draft_id: draftId,
+          team_id: teamId,
+          player_id: playerId,
+          round: pickInfo.round,
+          pick: pickInfo.pick,
+          overall_pick: pickInfo.overallPick,
+          pick_time: new Date().toISOString(),
+        });
+
+      if (insertError) {
+        console.error('Error inserting draft pick:', insertError);
+        throw insertError;
+      }
+
+      console.log(`Team ${teamId} successfully drafted player ${playerId} (Overall pick ${pickInfo.overallPick})`);
+      return true;
     } catch (error) {
       console.error('Failed to make pick:', error);
       throw error;
@@ -196,15 +258,50 @@ export class DraftService {
   /**
    * Get AI recommendation for current pick
    */
-  static async getAIRecommendation(draftId: string, teamId: string, availablePlayers: DraftablePlayer[]): Promise<DraftablePlayer | null> {
+  static async getAIRecommendation(draftId: string, teamId: string, availablePlayers: DraftablePlayer[], currentRound: number): Promise<DraftablePlayer | null> {
     try {
-      // Simple AI logic: pick best available player by ADP
       const available = availablePlayers.filter(p => !p.isDrafted);
       if (available.length === 0) return null;
 
-      // Sort by ADP (lower is better)
-      available.sort((a, b) => (a.adp || 999) - (b.adp || 999));
+      // Get current team's roster to determine positional needs
+      const teamPicks = await this.getDraftPicks(draftId);
+      const teamPlayers = teamPicks.filter(pick => pick.teamId === teamId);
       
+      // Count positions already drafted
+      const positionCounts = teamPlayers.reduce((acc, pick) => {
+        acc[pick.position || 'UNKNOWN'] = (acc[pick.position || 'UNKNOWN'] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      // Positional priority based on round
+      let positionPriority: string[];
+      if (currentRound <= 3) {
+        positionPriority = ['RB', 'WR', 'QB', 'TE'];
+      } else if (currentRound <= 8) {
+        positionPriority = ['WR', 'RB', 'TE', 'QB'];
+      } else {
+        positionPriority = ['WR', 'RB', 'TE', 'QB', 'K', 'DEF'];
+      }
+
+      // Find best available player considering positional needs
+      for (const position of positionPriority) {
+        const positionPlayers = available
+          .filter(p => p.position === position)
+          .sort((a, b) => (a.adp || 999) - (b.adp || 999));
+        
+        if (positionPlayers.length > 0) {
+          // Consider if we already have enough at this position
+          const currentAtPosition = positionCounts[position] || 0;
+          const maxAtPosition = position === 'QB' ? 3 : position === 'TE' ? 2 : position === 'K' ? 1 : position === 'DEF' ? 1 : 6;
+          
+          if (currentAtPosition < maxAtPosition) {
+            return positionPlayers[0];
+          }
+        }
+      }
+      
+      // Fallback: best available by ADP
+      available.sort((a, b) => (a.adp || 999) - (b.adp || 999));
       return available[0];
     } catch (error) {
       console.error('Failed to get AI recommendation:', error);
@@ -217,12 +314,29 @@ export class DraftService {
    */
   static async completeDraft(leagueId: string, draftId: string): Promise<void> {
     try {
-      // In real implementation, this would:
-      // 1. Mark draft as completed
-      // 2. Update league status to 'active'
-      // 3. Generate initial rosters from draft results
+      // Get all draft picks
+      const picks = await this.getDraftPicks(draftId);
       
-      console.log(`Draft ${draftId} completed for league ${leagueId}`);
+      // Create team rosters from draft picks
+      const rosterInserts = picks.map(pick => ({
+        league_id: leagueId,
+        team_id: pick.teamId,
+        player_id: pick.playerId!,
+        position_type: pick.position,
+      }));
+
+      if (rosterInserts.length > 0) {
+        const { error: rosterError } = await supabase
+          .from('team_rosters')
+          .insert(rosterInserts);
+
+        if (rosterError) {
+          console.error('Error creating team rosters:', rosterError);
+          throw rosterError;
+        }
+      }
+      
+      console.log(`Draft ${draftId} completed for league ${leagueId}. Created ${rosterInserts.length} roster entries.`);
     } catch (error) {
       console.error('Failed to complete draft:', error);
       throw error;
