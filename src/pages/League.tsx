@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Settings } from 'lucide-react';
 import LeagueNavigation from '../components/League/LeagueNavigation';
 import Standings from '../components/League/Standings';
 import TeamRoster from '../components/Team/TeamRoster';
@@ -13,10 +14,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LeagueService } from '@/services/LeagueService';
 import { DraftService } from '@/services/DraftService';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { LeagueStatus } from '@/types/draft';
 
 const League = () => {
   const { leagueId } = useParams<{ leagueId: string }>();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('standings');
   const [currentWeek, setCurrentWeek] = useState(1);
   const [leagueName, setLeagueName] = useState<string | null>(null);
@@ -104,7 +107,18 @@ const League = () => {
   return (
     <div className="container mx-auto p-4">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold">{leagueName || `League ${safeLeagueId}`}</h1>
+        <div className="flex items-center">
+          <h1 className="text-2xl font-bold mr-3">{leagueName || `League ${safeLeagueId}`}</h1>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => navigate(`/league/${safeLeagueId}/settings`)}
+            className="flex items-center text-xs"
+          >
+            <Settings className="h-3 w-3 mr-1" />
+            Settings
+          </Button>
+        </div>
         <div className="flex gap-2">
           <LeagueNavigation activeTab={activeTab} onChange={handleTabChange} />
           <DataImportButton />
