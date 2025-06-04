@@ -14,6 +14,7 @@ import Players from "./pages/Players";
 import Trades from "./pages/Trades";
 import CreateLeague from "./pages/CreateLeague";
 import PlayerProfile from "./pages/PlayerProfile";
+import DynastyRankings from "./pages/DynastyRankings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
               <Route path="/league/:leagueId" element={<League />} />
               <Route path="/players" element={<Players />} />
               <Route path="/players/:id" element={<PlayerProfile />} />
+              <Route path="/rankings" element={<DynastyRankings />} />
               <Route path="/trades" element={<Trades />} />
               <Route path="/create-league" element={<CreateLeague />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

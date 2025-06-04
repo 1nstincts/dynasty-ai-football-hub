@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store';
-import { Plus, Search, TrendingUp, Trophy, Newspaper } from 'lucide-react';
+import { Plus, Search, TrendingUp, Trophy, Newspaper, BarChart3 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LeagueService } from '@/services/LeagueService';
@@ -156,7 +156,7 @@ const Dashboard = () => {
         <h1 className="text-3xl font-bold mb-4">Fantasy Football Hub</h1>
         <p className="text-sleeper-gray mb-6">Manage your dynasty leagues, check player stats, and make strategic moves all in one place.</p>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="bg-sleeper-dark border-sleeper-dark hover:border-sleeper-accent transition-colors cursor-pointer" onClick={handleCreateLeague}>
             <CardContent className="pt-6 flex flex-col items-center text-center">
               <div className="w-12 h-12 rounded-full bg-sleeper-primary flex items-center justify-center mb-4">
@@ -174,6 +174,16 @@ const Dashboard = () => {
               </div>
               <h3 className="text-lg font-semibold mb-2">Player Database</h3>
               <p className="text-sm text-sleeper-gray">Browse players, check stats, and analyze performance</p>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-sleeper-dark border-sleeper-dark hover:border-sleeper-accent transition-colors cursor-pointer" onClick={() => navigate('/rankings')}>
+            <CardContent className="pt-6 flex flex-col items-center text-center">
+              <div className="w-12 h-12 rounded-full bg-sleeper-primary flex items-center justify-center mb-4">
+                <BarChart3 className="h-6 w-6" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Dynasty Rankings</h3>
+              <p className="text-sm text-sleeper-gray">View position and overall rankings for dynasty leagues</p>
             </CardContent>
           </Card>
           
