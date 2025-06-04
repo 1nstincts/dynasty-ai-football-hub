@@ -10,7 +10,8 @@ import {
   Award, 
   Settings,
   TrendingUp,
-  Database
+  Database,
+  BarChart
 } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
@@ -76,6 +77,10 @@ const Sidebar: React.FC = () => {
           <Link to="/rankings" className="flex items-center p-2 rounded hover:bg-sleeper-darker">
             <TrendingUp className="mr-2 h-5 w-5 text-sleeper-gray" />
             <span className="text-sleeper-gray">Dynasty Rankings</span>
+          </Link>
+          <Link to="/values" className="flex items-center p-2 rounded hover:bg-sleeper-darker">
+            <BarChart className="mr-2 h-5 w-5 text-sleeper-gray" />
+            <span className="text-sleeper-gray">Player Values</span>
           </Link>
           <Link to="/trade-analyzer" className="flex items-center p-2 rounded hover:bg-sleeper-darker">
             <Award className="mr-2 h-5 w-5 text-sleeper-gray" />

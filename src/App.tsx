@@ -17,6 +17,7 @@ import PlayerProfile from "./pages/PlayerProfile";
 import DynastyRankings from "./pages/DynastyRankings";
 import TradeAnalyzer from "./pages/TradeAnalyzer";
 import LeagueSettings from "./pages/LeagueSettings";
+import PlayerValueCharts from "./pages/PlayerValueCharts";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
               <Route path="/players" element={<Players />} />
               <Route path="/players/:id" element={<PlayerProfile />} />
               <Route path="/rankings" element={<DynastyRankings />} />
+              <Route path="/values" element={<PlayerValueCharts />} />
               <Route path="/trades" element={<Trades />} />
               <Route path="/trade-analyzer" element={<TradeAnalyzer />} />
               <Route path="/create-league" element={<CreateLeague />} />
