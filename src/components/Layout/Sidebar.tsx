@@ -12,9 +12,11 @@ import {
   TrendingUp,
   Database,
   BarChart,
+  BarChart2,
   Calculator,
   Calendar,
-  TrendingDown
+  TrendingDown,
+  Brain
 } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
@@ -100,6 +102,14 @@ const Sidebar: React.FC = () => {
           <Link to="/dynasty-calculator" className="flex items-center p-2 rounded hover:bg-sleeper-darker">
             <TrendingDown className="mr-2 h-5 w-5 text-sleeper-gray" />
             <span className="text-sleeper-gray">Dynasty Calculator</span>
+          </Link>
+          <Link to="/team-analysis" className="flex items-center p-2 rounded hover:bg-sleeper-darker">
+            <Brain className="mr-2 h-5 w-5 text-sleeper-gray" />
+            <span className="text-sleeper-gray">AI Team Analysis</span>
+          </Link>
+          <Link to="/player-comparison" className="flex items-center p-2 rounded hover:bg-sleeper-darker">
+            <BarChart2 className="mr-2 h-5 w-5 text-sleeper-gray" />
+            <span className="text-sleeper-gray">Player Comparison</span>
           </Link>
         </div>
       </div>

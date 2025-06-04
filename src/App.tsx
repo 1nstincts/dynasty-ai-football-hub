@@ -21,6 +21,8 @@ import PlayerValueCharts from "./pages/PlayerValueCharts";
 import ProjectionsCalculator from "./pages/ProjectionsCalculator";
 import ScheduleGenerator from "./pages/ScheduleGenerator";
 import DynastyValueCalculator from "./pages/DynastyValueCalculator";
+import TeamAnalysis from "./pages/TeamAnalysis";
+import PlayerComparison from "./pages/PlayerComparison";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +49,9 @@ const App = () => (
               <Route path="/projections" element={<ProjectionsCalculator />} />
               <Route path="/schedule" element={<ScheduleGenerator />} />
               <Route path="/dynasty-calculator" element={<DynastyValueCalculator />} />
+              <Route path="/team-analysis/:teamId" element={<TeamAnalysis />} />
+              <Route path="/team-analysis" element={<TeamAnalysis />} />
+              <Route path="/player-comparison" element={<PlayerComparison />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */>
               <Route path="*" element={<NotFound />} />
             </Routes>
