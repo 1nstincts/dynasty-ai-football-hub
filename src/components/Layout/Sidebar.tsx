@@ -77,7 +77,7 @@ const Sidebar: React.FC = () => {
             <TrendingUp className="mr-2 h-5 w-5 text-sleeper-gray" />
             <span className="text-sleeper-gray">Dynasty Rankings</span>
           </Link>
-          <Link to="/trades" className="flex items-center p-2 rounded hover:bg-sleeper-darker">
+          <Link to="/trade-analyzer" className="flex items-center p-2 rounded hover:bg-sleeper-darker">
             <Award className="mr-2 h-5 w-5 text-sleeper-gray" />
             <span className="text-sleeper-gray">Trade Analyzer</span>
           </Link>

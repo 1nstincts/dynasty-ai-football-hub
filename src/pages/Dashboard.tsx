@@ -187,13 +187,13 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           
-          <Card className="bg-sleeper-dark border-sleeper-dark hover:border-sleeper-accent transition-colors cursor-pointer" onClick={() => navigate('/trades')}>
+          <Card className="bg-sleeper-dark border-sleeper-dark hover:border-sleeper-accent transition-colors cursor-pointer" onClick={() => navigate('/trade-analyzer')}>
             <CardContent className="pt-6 flex flex-col items-center text-center">
               <div className="w-12 h-12 rounded-full bg-sleeper-primary flex items-center justify-center mb-4">
                 <Trophy className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">Trade Center</h3>
-              <p className="text-sm text-sleeper-gray">Propose and review trades across your leagues</p>
+              <h3 className="text-lg font-semibold mb-2">Trade Analyzer</h3>
+              <p className="text-sm text-sleeper-gray">Evaluate trades and analyze their impact on your team</p>
             </CardContent>
           </Card>
         </div>
