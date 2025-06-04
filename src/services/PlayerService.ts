@@ -1,22 +1,34 @@
-
 import { Player } from '@/store/slices/playersSlice';
 import { supabase } from '@/integrations/supabase/client';
+import SleeperService from './SleeperService';
 
 /**
  * Service for fetching and managing player data
  */
 export class PlayerService {
+  private static currentSeason: number = new Date().getFullYear();
+  private static currentWeek: number = 1; // You might want to calculate this based on the current date
+
   /**
-   * Fetch all players
+   * Fetch all players - now with option to use Sleeper API data
    */
-  static async getAllPlayers(): Promise<Player[]> {
+  static async getAllPlayers(useSleeperData: boolean = true): Promise<Player[]> {
     try {
+      // If using Sleeper data, fetch from there instead of Supabase
+      if (useSleeperData) {
+        return await SleeperService.getPlayersWithLiveData(
+          this.currentSeason, 
+          this.currentWeek
+        );
+      }
+      
+      // Fall back to Supabase data if not using Sleeper or if Sleeper fails
       const { data, error } = await supabase
         .from('players')
         .select('*');
 
       if (error) {
-        console.error('Error fetching players:', error);
+        console.error('Error fetching players from Supabase:', error);
         return mockPlayers; // Fallback to mock data if API fails
       }
 
@@ -35,6 +47,54 @@ export class PlayerService {
       console.error('Failed to get players:', error);
       return mockPlayers; // Fallback to mock data
     }
+  }
+  
+  /**
+   * Get trending players from Sleeper API
+   */
+  static async getTrendingPlayers(limit: number = 25): Promise<Player[]> {
+    try {
+      return await SleeperService.getTrendingPlayers(limit);
+    } catch (error) {
+      console.error('Failed to get trending players:', error);
+      return [];
+    }
+  }
+  
+  /**
+   * Update player stats and projections with live data
+   */
+  static async refreshPlayerData(players: Player[]): Promise<Player[]> {
+    try {
+      // Get latest stats and projections
+      const [stats, projections] = await Promise.all([
+        SleeperService.getPlayerStats(this.currentSeason, this.currentWeek),
+        SleeperService.getPlayerProjections(this.currentSeason, this.currentWeek)
+      ]);
+      
+      // Update players with latest data
+      return players.map(player => {
+        const updatedStats = stats[player.id];
+        const updatedProjections = projections[player.id];
+        
+        return {
+          ...player,
+          stats: updatedStats || player.stats,
+          projections: updatedProjections || player.projections
+        };
+      });
+    } catch (error) {
+      console.error('Failed to refresh player data:', error);
+      return players; // Return original players if refresh fails
+    }
+  }
+  
+  /**
+   * Set the current season and week for data retrieval
+   */
+  static setCurrentPeriod(season: number, week: number): void {
+    this.currentSeason = season;
+    this.currentWeek = week;
   }
 
   /**
