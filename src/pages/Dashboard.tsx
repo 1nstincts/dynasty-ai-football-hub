@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store';
-import { Plus, Search, TrendingUp, Trophy } from 'lucide-react';
+import { Plus, Search, TrendingUp, Trophy, Newspaper } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LeagueService } from '@/services/LeagueService';
@@ -14,6 +14,7 @@ import { Player } from '@/store/slices/playersSlice';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import TrendingPlayers from '@/components/Trend/TrendingPlayers';
+import NewsFeed from '@/components/Player/NewsFeed';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -188,8 +189,8 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="lg:col-span-1">
           <div className="mb-6 flex justify-between items-center">
             <h2 className="text-2xl font-bold">Top Players</h2>
             <Button 
@@ -231,7 +232,12 @@ const Dashboard = () => {
                       </Avatar>
                       <div className="flex-1">
                         <div className="flex items-center">
-                          <p className="font-semibold">{player.name}</p>
+                          <a 
+                            href={`/players/${player.id}`}
+                            className="font-semibold hover:text-primary hover:underline"
+                          >
+                            {player.name}
+                          </a>
                           <Badge className={`${getPositionClass(player.position)} ml-2 text-xs`}>
                             {player.position}
                           </Badge>
@@ -261,11 +267,18 @@ const Dashboard = () => {
           </Card>
         </div>
         
-        <div>
+        <div className="lg:col-span-1">
           <div className="mb-6 flex justify-between items-center">
             <h2 className="text-2xl font-bold">Trending Players</h2>
           </div>
           <TrendingPlayers />
+        </div>
+        
+        <div className="lg:col-span-1">
+          <div className="mb-6 flex justify-between items-center">
+            <h2 className="text-2xl font-bold">Latest News</h2>
+          </div>
+          <NewsFeed limit={5} />
         </div>
       </div>
 

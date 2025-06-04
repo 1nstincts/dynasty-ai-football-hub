@@ -323,7 +323,12 @@ const PlayerList: React.FC<PlayerListProps> = ({ leagueId }) => {
                   <AvatarImage src={`https://sleepercdn.com/content/nfl/players/${player.id}.jpg`} alt={player.name} />
                   <AvatarFallback style={getTeamColorStyle(player)}>{getInitials(player.name)}</AvatarFallback>
                 </Avatar>
-                <span className="truncate">{player.name}</span>
+                <a 
+                  href={`/players/${player.id}`} 
+                  className="truncate hover:text-primary hover:underline"
+                >
+                  {player.name}
+                </a>
                 {player.trending && (
                   <TrendingUp className="h-4 w-4 ml-2 text-green-500" />
                 )}

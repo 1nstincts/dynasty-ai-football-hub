@@ -41,6 +41,28 @@ interface SleeperTrendingPlayer {
 /**
  * Service for interacting with the Sleeper API to get NFL player data
  */
+interface SleeperNewsItem {
+  player_id: string;
+  source: string;
+  title: string;
+  description: string;
+  timestamp: number;
+  source_id: string;
+  source_url: string;
+  news_id: string;
+  injury_status?: string;
+}
+
+export interface PlayerNews {
+  id: string;
+  title: string;
+  description: string;
+  timestamp: number;
+  source: string;
+  sourceUrl: string;
+  injuryStatus?: string;
+}
+
 export class SleeperService {
   private static readonly BASE_URL = 'https://api.sleeper.app/v1';
   
@@ -278,6 +300,58 @@ export class SleeperService {
         attempts: 0
       }
     };
+  }
+  
+  /**
+   * Get the latest news for a specific player
+   */
+  static async getPlayerNews(playerId: string): Promise<PlayerNews[]> {
+    try {
+      const response = await fetch(`${this.BASE_URL}/players/nfl/${playerId}/news`);
+      if (!response.ok) throw new Error(`Failed to fetch news for player ${playerId}`);
+      
+      const newsData: SleeperNewsItem[] = await response.json();
+      
+      // Transform the news data to our format
+      return newsData.map(item => ({
+        id: item.news_id,
+        title: item.title,
+        description: item.description,
+        timestamp: item.timestamp,
+        source: item.source,
+        sourceUrl: item.source_url,
+        injuryStatus: item.injury_status
+      }));
+    } catch (error) {
+      console.error(`Error fetching news for player ${playerId}:`, error);
+      return [];
+    }
+  }
+  
+  /**
+   * Get the latest NFL news (all players)
+   */
+  static async getLatestNews(limit: number = 10): Promise<PlayerNews[]> {
+    try {
+      const response = await fetch(`${this.BASE_URL}/news/nfl?limit=${limit}`);
+      if (!response.ok) throw new Error('Failed to fetch latest NFL news');
+      
+      const newsData: SleeperNewsItem[] = await response.json();
+      
+      // Transform the news data to our format
+      return newsData.map(item => ({
+        id: item.news_id,
+        title: item.title,
+        description: item.description,
+        timestamp: item.timestamp,
+        source: item.source,
+        sourceUrl: item.source_url,
+        injuryStatus: item.injury_status
+      }));
+    } catch (error) {
+      console.error('Error fetching latest NFL news:', error);
+      return [];
+    }
   }
 }
 
