@@ -11,7 +11,10 @@ import {
   Settings,
   TrendingUp,
   Database,
-  BarChart
+  BarChart,
+  Calculator,
+  Calendar,
+  TrendingDown
 } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
@@ -85,6 +88,18 @@ const Sidebar: React.FC = () => {
           <Link to="/trade-analyzer" className="flex items-center p-2 rounded hover:bg-sleeper-darker">
             <Award className="mr-2 h-5 w-5 text-sleeper-gray" />
             <span className="text-sleeper-gray">Trade Analyzer</span>
+          </Link>
+          <Link to="/projections" className="flex items-center p-2 rounded hover:bg-sleeper-darker">
+            <Calculator className="mr-2 h-5 w-5 text-sleeper-gray" />
+            <span className="text-sleeper-gray">Points Projections</span>
+          </Link>
+          <Link to="/schedule" className="flex items-center p-2 rounded hover:bg-sleeper-darker">
+            <Calendar className="mr-2 h-5 w-5 text-sleeper-gray" />
+            <span className="text-sleeper-gray">Schedule Generator</span>
+          </Link>
+          <Link to="/dynasty-calculator" className="flex items-center p-2 rounded hover:bg-sleeper-darker">
+            <TrendingDown className="mr-2 h-5 w-5 text-sleeper-gray" />
+            <span className="text-sleeper-gray">Dynasty Calculator</span>
           </Link>
         </div>
       </div>

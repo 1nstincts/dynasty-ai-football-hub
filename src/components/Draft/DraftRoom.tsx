@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { DraftService } from '@/services/DraftService';
 import { Draft, DraftablePlayer } from '@/types/draft';
 import { useToast } from '@/components/ui/use-toast';
@@ -133,7 +134,29 @@ const DraftRoom: React.FC<DraftRoomProps> = ({ draftId, onDraftComplete }) => {
 
       return () => clearInterval(timer);
     }
-  }, [draft, timeRemaining]);\n\n  // AI auto-pick effect\n  useEffect(() => {\n    if (draft?.status === 'in_progress' && draft.currentTeamId !== 'user-team') {\n      // AI turn - auto pick after 2-5 seconds\n      const aiDelay = Math.random() * 3000 + 2000;\n      const aiTimer = setTimeout(async () => {\n        const recommendation = await DraftService.getAIRecommendation(\n          draft.id, \n          draft.currentTeamId, \n          availablePlayers,\n          draft.currentRound\n        );\n        \n        if (recommendation && !recommendation.isDrafted) {\n          await handlePlayerSelect(recommendation);\n        }\n      }, aiDelay);\n      \n      return () => clearTimeout(aiTimer);\n    }\n  }, [draft?.currentTeamId, draft?.currentPick, availablePlayers]);
+  }, [draft, timeRemaining]);
+
+  // AI auto-pick effect
+  useEffect(() => {
+    if (draft?.status === 'in_progress' && draft.currentTeamId !== 'user-team') {
+      // AI turn - auto pick after 2-5 seconds
+      const aiDelay = Math.random() * 3000 + 2000;
+      const aiTimer = setTimeout(async () => {
+        const recommendation = await DraftService.getAIRecommendation(
+          draft.id, 
+          draft.currentTeamId, 
+          availablePlayers,
+          draft.currentRound
+        );
+        
+        if (recommendation && !recommendation.isDrafted) {
+          await handlePlayerSelect(recommendation);
+        }
+      }, aiDelay);
+      
+      return () => clearTimeout(aiTimer);
+    }
+  }, [draft?.currentTeamId, draft?.currentPick, availablePlayers]);
 
   const handlePlayerSelect = async (player: DraftablePlayer) => {
     if (!draft || player.isDrafted) return;
@@ -194,6 +217,37 @@ const DraftRoom: React.FC<DraftRoomProps> = ({ draftId, onDraftComplete }) => {
   };
 
   const positions = ['ALL', 'QB', 'RB', 'WR', 'TE', 'K', 'DEF'];
+  
+  // Helper functions for player display
+  const getPositionClass = (position: string) => {
+    switch (position) {
+      case 'QB': return 'bg-red-600 text-white';
+      case 'RB': return 'bg-green-600 text-white';
+      case 'WR': return 'bg-blue-600 text-white';
+      case 'TE': return 'bg-orange-600 text-white';
+      case 'K': return 'bg-purple-600 text-white';
+      case 'DEF': return 'bg-yellow-600 text-black';
+      default: return 'bg-gray-600 text-white';
+    }
+  };
+  
+  const getTeamColorStyle = (player: DraftablePlayer) => {
+    if (player.team_primary_color) {
+      return { 
+        backgroundColor: player.team_primary_color,
+        color: player.team_secondary_color || '#FFFFFF'
+      };
+    }
+    return {}; // Default styling
+  };
+  
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .slice(0, 2);
+  };
 
   if (isLoading) {
     return (
@@ -319,14 +373,23 @@ const DraftRoom: React.FC<DraftRoomProps> = ({ draftId, onDraftComplete }) => {
                       >
                         {player.position}
                       </Badge>
-                      <div>
-                        <div className={`font-semibold ${player.isDrafted ? 'line-through' : ''}`}>
-                          {player.full_name}
+                      <div className="flex items-center">
+                        <Avatar className="h-8 w-8 mr-2">
+                          <AvatarImage src={player.image_url} alt={player.full_name} />
+                          <AvatarFallback style={player.team_primary_color ? { 
+                            backgroundColor: player.team_primary_color,
+                            color: player.team_secondary_color || '#FFFFFF'
+                          } : {}}>{getInitials(player.full_name)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className={`font-semibold ${player.isDrafted ? 'line-through' : ''}`}>
+                            {player.full_name}
+                          </div>
+                          <div className="text-sm text-sleeper-gray">{player.team}</div>
+                          {player.isDrafted && (
+                            <div className="text-xs text-red-400">DRAFTED</div>
+                          )}
                         </div>
-                        <div className="text-sm text-sleeper-gray">{player.team}</div>
-                        {player.isDrafted && (
-                          <div className="text-xs text-red-400">DRAFTED</div>
-                        )}
                       </div>
                     </div>
                     
@@ -362,10 +425,15 @@ const DraftRoom: React.FC<DraftRoomProps> = ({ draftId, onDraftComplete }) => {
                 ) : (
                   draft.picks.slice(-10).reverse().map(pick => (
                     <div key={pick.id} className="flex justify-between items-center p-2 border border-sleeper-darker rounded">
-                      <div>
-                        <div className="font-semibold text-sm">{pick.playerName}</div>
-                        <div className="text-xs text-sleeper-gray">
-                          {pick.isUserPick ? 'Your Team' : `AI Team ${pick.teamId.replace('ai-team-', '')}`}
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 bg-sleeper-primary rounded-full flex items-center justify-center mr-2 text-xs">
+                          {pick.nflTeam || '-'}
+                        </div>
+                        <div>
+                          <div className="font-semibold text-sm">{pick.playerName}</div>
+                          <div className="text-xs text-sleeper-gray">
+                            {pick.isUserPick ? 'Your Team' : `AI Team ${pick.teamId.replace('ai-team-', '')}`}
+                          </div>
                         </div>
                       </div>
                       <div className="text-right">

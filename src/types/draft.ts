@@ -42,6 +42,11 @@ export interface DraftablePlayer {
   isDrafted: boolean;
   draftedBy?: string;
   adp?: number; // Average Draft Position for AI logic
+  image_url?: string; // Player image URL
+  team_primary_color?: string; // Primary team color
+  team_secondary_color?: string; // Secondary team color
+  fantasy_position_rank?: number; // Position rank for fantasy
+  last_season_points?: number; // Fantasy points from last season
 }
 
 export interface LeagueStatus {

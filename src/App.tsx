@@ -18,6 +18,9 @@ import DynastyRankings from "./pages/DynastyRankings";
 import TradeAnalyzer from "./pages/TradeAnalyzer";
 import LeagueSettings from "./pages/LeagueSettings";
 import PlayerValueCharts from "./pages/PlayerValueCharts";
+import ProjectionsCalculator from "./pages/ProjectionsCalculator";
+import ScheduleGenerator from "./pages/ScheduleGenerator";
+import DynastyValueCalculator from "./pages/DynastyValueCalculator";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,7 +44,10 @@ const App = () => (
               <Route path="/trades" element={<Trades />} />
               <Route path="/trade-analyzer" element={<TradeAnalyzer />} />
               <Route path="/create-league" element={<CreateLeague />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="/projections" element={<ProjectionsCalculator />} />
+              <Route path="/schedule" element={<ScheduleGenerator />} />
+              <Route path="/dynasty-calculator" element={<DynastyValueCalculator />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */>
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>

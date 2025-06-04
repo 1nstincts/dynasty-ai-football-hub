@@ -32,11 +32,6 @@ export class DraftService {
         .eq('is_active', true)
         .order('dynasty_adp', { ascending: true, nullsLast: true });
 
-      if (error) {
-        console.error('Error fetching draftable players:', error);
-        throw error;
-      }
-
       // Get already drafted players for this draft if draftId provided
       let draftedPlayerIds: string[] = [];
       if (draftId) {
