@@ -103,7 +103,7 @@ const DynastyValueCalculator: React.FC = () => {
           { id: '2', name: 'Bijan Robinson', position: 'RB', team: 'ATL', age: 22, experience: 1, dynasty_value: 94, redraft_value: 91 },
           { id: '3', name: 'CeeDee Lamb', position: 'WR', team: 'DAL', age: 25, experience: 4, dynasty_value: 92, redraft_value: 94 },
           { id: '4', name: 'Justin Jefferson', position: 'WR', team: 'MIN', age: 25, experience: 4, dynasty_value: 93, redraft_value: 95 },
-          { id: '5', name: 'Ja\'Marr Chase', position: 'WR', team: 'CIN', age: 24, experience: 3, dynasty_value: 92, redraft_value: 93 },
+          { id: '5', name: 'Ja'Marr Chase', position: 'WR', team: 'CIN', age: 24, experience: 3, dynasty_value: 92, redraft_value: 93 },
           { id: '6', name: 'Patrick Mahomes', position: 'QB', team: 'KC', age: 28, experience: 7, dynasty_value: 90, redraft_value: 92 },
           { id: '7', name: 'Travis Kelce', position: 'TE', team: 'KC', age: 34, experience: 11, dynasty_value: 78, redraft_value: 90 },
           { id: '8', name: 'Lamar Jackson', position: 'QB', team: 'BAL', age: 27, experience: 6, dynasty_value: 88, redraft_value: 90 },
@@ -242,7 +242,7 @@ const DynastyValueCalculator: React.FC = () => {
         item.value,
         getValueTier(item.value).name
       ].join(','))
-    ].join('\n');
+    ].join('\\n');
     
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);

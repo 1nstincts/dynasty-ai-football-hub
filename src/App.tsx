@@ -76,7 +76,7 @@ const App = () => (
               <Route path="/league/:leagueId/history" element={<LeagueHistory />} />
               <Route path="/mobile-app" element={<MobileApp />} />
               <Route path="/new-features" element={<NewFeatures />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */>
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>

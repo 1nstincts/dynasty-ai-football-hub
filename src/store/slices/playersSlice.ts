@@ -1,3 +1,4 @@
+
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface PlayerStats {
@@ -28,31 +29,14 @@ export interface Player {
   team: string;
   age: number;
   experience: number;
+  stats: PlayerStats;
+  projections: PlayerStats;
+  adp?: number;
   dynasty_value?: number;
-  redraft_value?: number;
-  dynasty_rank?: {
-    overall: number;
-    position: number;
-  };
   trending?: {
-    direction: 'up' | 'down';
     value: number;
-  };
-  stats?: {
-    passing?: {
-      yards: number;
-      touchdowns: number;
-      interceptions: number;
-    };
-    rushing?: {
-      yards: number;
-      touchdowns: number;
-    };
-    receiving?: {
-      yards: number;
-      touchdowns: number;
-      receptions: number;
-    };
+    direction: 'up' | 'down';
+    percentage: number;
   };
 }
 
