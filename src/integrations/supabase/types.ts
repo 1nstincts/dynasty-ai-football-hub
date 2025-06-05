@@ -9,38 +9,49 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      leagues: {
+      draft_picks: {
         Row: {
-          id: string
-          name: string
-          type: string
-          size: number
-          owner_id: string | null
-          settings: Json | null
           created_at: string | null
-          updated_at: string | null
+          draft_id: string
+          id: string
+          overall_pick: number
+          pick: number
+          pick_time: string | null
+          player_id: string
+          round: number
+          team_id: string
         }
         Insert: {
-          id?: string
-          name: string
-          type: string
-          size: number
-          owner_id?: string | null
-          settings?: Json | null
           created_at?: string | null
-          updated_at?: string | null
+          draft_id: string
+          id?: string
+          overall_pick: number
+          pick: number
+          pick_time?: string | null
+          player_id: string
+          round: number
+          team_id: string
         }
         Update: {
-          id?: string
-          name?: string
-          type?: string
-          size?: number
-          owner_id?: string | null
-          settings?: Json | null
           created_at?: string | null
-          updated_at?: string | null
+          draft_id?: string
+          id?: string
+          overall_pick?: number
+          pick?: number
+          pick_time?: string | null
+          player_id?: string
+          round?: number
+          team_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "draft_picks_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["player_id"]
+          },
+        ]
       }
       games: {
         Row: {
@@ -72,56 +83,151 @@ export type Database = {
         }
         Relationships: []
       }
+      leagues: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          owner_id: string | null
+          settings: Json | null
+          size: number
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          owner_id?: string | null
+          settings?: Json | null
+          size: number
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          owner_id?: string | null
+          settings?: Json | null
+          size?: number
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       players: {
         Row: {
+          adp: number | null
           birth_date: string | null
+          bye_week: number | null
+          college: string | null
           created_at: string | null
           draft_pick: number | null
           draft_round: number | null
           draft_year: number | null
+          dynasty_adp: number | null
+          experience: number | null
+          fantasy_position_rank: number | null
           full_name: string | null
           height: string | null
+          image_url: string | null
+          is_active: boolean | null
+          jersey_number: number | null
+          last_season_points: number | null
           player_id: string
           position: string | null
           team: string | null
+          team_primary_color: string | null
+          team_secondary_color: string | null
           weight: number | null
-          adp: number | null
-          dynasty_adp: number | null
-          is_active: boolean | null
         }
         Insert: {
+          adp?: number | null
           birth_date?: string | null
+          bye_week?: number | null
+          college?: string | null
           created_at?: string | null
           draft_pick?: number | null
           draft_round?: number | null
           draft_year?: number | null
+          dynasty_adp?: number | null
+          experience?: number | null
+          fantasy_position_rank?: number | null
           full_name?: string | null
           height?: string | null
+          image_url?: string | null
+          is_active?: boolean | null
+          jersey_number?: number | null
+          last_season_points?: number | null
           player_id: string
           position?: string | null
           team?: string | null
+          team_primary_color?: string | null
+          team_secondary_color?: string | null
           weight?: number | null
-          adp?: number | null
-          dynasty_adp?: number | null
-          is_active?: boolean | null
         }
         Update: {
+          adp?: number | null
           birth_date?: string | null
+          bye_week?: number | null
+          college?: string | null
           created_at?: string | null
           draft_pick?: number | null
           draft_round?: number | null
           draft_year?: number | null
+          dynasty_adp?: number | null
+          experience?: number | null
+          fantasy_position_rank?: number | null
           full_name?: string | null
           height?: string | null
+          image_url?: string | null
+          is_active?: boolean | null
+          jersey_number?: number | null
+          last_season_points?: number | null
           player_id?: string
           position?: string | null
           team?: string | null
+          team_primary_color?: string | null
+          team_secondary_color?: string | null
           weight?: number | null
-          adp?: number | null
-          dynasty_adp?: number | null
-          is_active?: boolean | null
         }
         Relationships: []
+      }
+      team_rosters: {
+        Row: {
+          created_at: string | null
+          id: string
+          league_id: string
+          player_id: string
+          position_type: string | null
+          team_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          league_id: string
+          player_id: string
+          position_type?: string | null
+          team_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          league_id?: string
+          player_id?: string
+          position_type?: string | null
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_rosters_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["player_id"]
+          },
+        ]
       }
     }
     Views: {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store';
-import { Plus, Search, TrendingUp, Trophy, Newspaper, BarChart3, ExternalLink } from 'lucide-react';
+import { Plus, Search, TrendingUp, Trophy, Newspaper, BarChart3, ExternalLink, Sparkles } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LeagueService } from '@/services/LeagueService';
@@ -153,19 +153,23 @@ const Dashboard = () => {
   return (
     <div className="max-w-5xl mx-auto p-6">
       {/* HUGE BANNER FOR NEW FEATURES */}
-      <div className="w-full bg-sleeper-accent mb-8 p-6 rounded-lg shadow-lg">
+      <div className="w-full bg-gradient-to-r from-sleeper-accent to-yellow-400 mb-8 p-8 rounded-lg shadow-lg animate-pulse">
         <div className="flex flex-col md:flex-row items-center justify-between">
           <div className="text-sleeper-dark mb-4 md:mb-0">
-            <h2 className="text-3xl font-bold">NEW FEATURES ADDED!</h2>
-            <p className="text-xl font-semibold">Check out all our new dynasty fantasy football tools</p>
+            <div className="flex items-center mb-2">
+              <Sparkles className="h-8 w-8 mr-3 text-sleeper-dark" />
+              <h2 className="text-4xl font-bold">🚀 NEW FEATURES LIVE!</h2>
+            </div>
+            <p className="text-xl font-semibold">Discover our complete dynasty fantasy football toolkit</p>
+            <p className="text-lg mt-1">AI Analysis • Player Comparison • Draft War Room • Contract Management & More!</p>
           </div>
           <Button 
             size="lg" 
-            className="bg-sleeper-dark hover:bg-sleeper-darker text-white font-bold text-lg px-8 py-6"
+            className="bg-sleeper-dark hover:bg-sleeper-darker text-sleeper-accent font-bold text-xl px-10 py-8 shadow-2xl transform hover:scale-105 transition-all duration-200"
             onClick={() => navigate('/new-features')}
           >
-            <ExternalLink className="h-5 w-5 mr-2" />
-            VIEW NEW FEATURES
+            <ExternalLink className="h-6 w-6 mr-3" />
+            EXPLORE NOW
           </Button>
         </div>
       </div>
@@ -173,9 +177,16 @@ const Dashboard = () => {
       <div className="mb-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Fantasy Football Hub</h1>
-            <p className="text-sleeper-gray">Manage your dynasty leagues, check player stats, and make strategic moves all in one place.</p>
+            <h1 className="text-3xl font-bold mb-2">Dynasty AI Football Hub</h1>
+            <p className="text-sleeper-gray">Your complete dynasty fantasy football command center with AI-powered insights.</p>
           </div>
+          <Button 
+            className="bg-sleeper-accent text-sleeper-dark hover:bg-sleeper-accent/90 font-semibold mt-4 md:mt-0"
+            onClick={() => navigate('/new-features')}
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            View All Features
+          </Button>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -218,16 +229,36 @@ const Dashboard = () => {
               <p className="text-sm text-sleeper-gray">Evaluate trades and analyze their impact on your team</p>
             </CardContent>
           </Card>
-          
-          <Card className="bg-sleeper-accent border-sleeper-accent hover:border-sleeper-primary transition-colors cursor-pointer" onClick={() => navigate('/new-features')}>
-            <CardContent className="pt-6 flex flex-col items-center text-center">
-              <div className="w-12 h-12 rounded-full bg-sleeper-dark flex items-center justify-center mb-4">
-                <ExternalLink className="h-6 w-6 text-sleeper-accent" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2 text-sleeper-dark">New Features</h3>
-              <p className="text-sm text-sleeper-dark">Explore all our latest dynasty fantasy football tools</p>
-            </CardContent>
-          </Card>
+        </div>
+
+        {/* Featured New Features Section */}
+        <div className="mt-8 p-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
+          <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
+            <Sparkles className="h-6 w-6 mr-2" />
+            🔥 Featured New Tools
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="bg-white/10 border-white/20 hover:bg-white/20 transition-colors cursor-pointer" onClick={() => navigate('/team-analysis')}>
+              <CardContent className="pt-4 text-center">
+                <h3 className="text-white font-semibold mb-2">🤖 AI Team Analysis</h3>
+                <p className="text-white/80 text-sm">Get intelligent dynasty recommendations</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-white/10 border-white/20 hover:bg-white/20 transition-colors cursor-pointer" onClick={() => navigate('/draft-war-room')}>
+              <CardContent className="pt-4 text-center">
+                <h3 className="text-white font-semibold mb-2">🏈 Draft War Room</h3>
+                <p className="text-white/80 text-sm">Advanced rookie draft preparation</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-white/10 border-white/20 hover:bg-white/20 transition-colors cursor-pointer" onClick={() => navigate('/new-features')}>
+              <CardContent className="pt-4 text-center">
+                <h3 className="text-white font-semibold mb-2">🎯 View All Features</h3>
+                <p className="text-white/80 text-sm">Explore our complete toolkit</p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
 
@@ -247,18 +278,14 @@ const Dashboard = () => {
           <Card className="bg-sleeper-dark border-sleeper-dark shadow-md">
             <CardContent className="p-4">
               {playersLoading ? (
-                <>
-                  {Array(5).fill(0).map((_, i) => (
-                    <div key={i} className="flex items-center py-3 border-b border-sleeper-dark/20 last:border-0">
-                      <Skeleton className="h-10 w-10 rounded-full mr-3" />
-                      <div className="flex-1">
-                        <Skeleton className="h-4 w-40 mb-2" />
-                        <Skeleton className="h-3 w-24" />
-                      </div>
-                      <Skeleton className="h-8 w-12" />
-                    </div>
-                  ))}
-                </>
+                <div className="flex items-center py-3 border-b border-sleeper-dark/20 last:border-0">
+                  <Skeleton className="h-10 w-10 rounded-full mr-3" />
+                  <div className="flex-1">
+                    <Skeleton className="h-4 w-40 mb-2" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                  <Skeleton className="h-8 w-12" />
+                </div>
               ) : (
                 <div className="divide-y divide-sleeper-dark/20">
                   {topPlayers.map((player) => (
