@@ -1,0 +1,53 @@
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import { RootState } from '../store';
+import { Container, Typography } from '@mui/material';
+import ContractManager from '../components/Contract/ContractManager';
+import { Card } from '../components/ui/card';
+
+const ContractManagement: React.FC = () => {
+  const { leagueId, teamId } = useParams<{ leagueId?: string, teamId?: string }>();
+  const { currentLeague } = useSelector((state: RootState) => state.leagues);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading data
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <Container maxWidth="xl" className="py-8">
+        <Card className="p-8">
+          <div className="animate-pulse space-y-4">
+            <div className="h-10 bg-gray-200 rounded w-3/4"></div>
+            <div className="h-96 bg-gray-200 rounded"></div>
+          </div>
+        </Card>
+      </Container>
+    );
+  }
+
+  return (
+    <Container maxWidth="xl" className="py-8">
+      <Typography variant="h4" component="h1" className="mb-6">
+        Contract & Salary Cap Management
+        {currentLeague && (
+          <span className="text-gray-500 text-xl ml-2">
+            - {currentLeague.name}
+          </span>
+        )}
+      </Typography>
+      <Card className="p-6">
+        <ContractManager leagueId={leagueId || currentLeague?.id} teamId={teamId} />
+      </Card>
+    </Container>
+  );
+};
+
+export default ContractManagement;

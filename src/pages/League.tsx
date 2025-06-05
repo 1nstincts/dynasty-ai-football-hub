@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Settings } from 'lucide-react';
+import { Settings, BookOpen } from 'lucide-react';
 import LeagueNavigation from '../components/League/LeagueNavigation';
 import Standings from '../components/League/Standings';
 import TeamRoster from '../components/Team/TeamRoster';
@@ -109,15 +109,26 @@ const League = () => {
       <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center">
           <h1 className="text-2xl font-bold mr-3">{leagueName || `League ${safeLeagueId}`}</h1>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => navigate(`/league/${safeLeagueId}/settings`)}
-            className="flex items-center text-xs"
-          >
-            <Settings className="h-3 w-3 mr-1" />
-            Settings
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => navigate(`/league/${safeLeagueId}/settings`)}
+              className="flex items-center text-xs"
+            >
+              <Settings className="h-3 w-3 mr-1" />
+              Settings
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => navigate(`/league/${safeLeagueId}/history`)}
+              className="flex items-center text-xs"
+            >
+              <BookOpen className="h-3 w-3 mr-1" />
+              History
+            </Button>
+          </div>
         </div>
         <div className="flex gap-2">
           <LeagueNavigation activeTab={activeTab} onChange={handleTabChange} />

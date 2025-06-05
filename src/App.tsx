@@ -23,6 +23,14 @@ import ScheduleGenerator from "./pages/ScheduleGenerator";
 import DynastyValueCalculator from "./pages/DynastyValueCalculator";
 import TeamAnalysis from "./pages/TeamAnalysis";
 import PlayerComparison from "./pages/PlayerComparison";
+import DynastyWindow from "./pages/DynastyWindow";
+import DraftWarRoom from "./pages/DraftWarRoom";
+import LeagueRulesAnalysis from "./pages/LeagueRulesAnalysis";
+import ContractManagement from "./pages/ContractManagement";
+import SocialHub from "./pages/SocialHub";
+import MatchupForecast from "./pages/MatchupForecast";
+import LeagueHistory from "./pages/LeagueHistory";
+import MobileApp from "./pages/MobileApp";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -52,6 +60,20 @@ const App = () => (
               <Route path="/team-analysis/:teamId" element={<TeamAnalysis />} />
               <Route path="/team-analysis" element={<TeamAnalysis />} />
               <Route path="/player-comparison" element={<PlayerComparison />} />
+              <Route path="/dynasty-window" element={<DynastyWindow />} />
+              <Route path="/dynasty-window/:teamId" element={<DynastyWindow />} />
+              <Route path="/draft-war-room" element={<DraftWarRoom />} />
+              <Route path="/draft-war-room/:leagueId" element={<DraftWarRoom />} />
+              <Route path="/league-rules-analysis" element={<LeagueRulesAnalysis />} />
+              <Route path="/league-rules-analysis/:leagueId" element={<LeagueRulesAnalysis />} />
+              <Route path="/contract-management" element={<ContractManagement />} />
+              <Route path="/contract-management/:leagueId" element={<ContractManagement />} />
+              <Route path="/contract-management/:leagueId/:teamId" element={<ContractManagement />} />
+              <Route path="/social" element={<SocialHub />} />
+              <Route path="/social/:tab" element={<SocialHub />} />
+              <Route path="/league/:leagueId/matchup-forecast/:matchupId" element={<MatchupForecast />} />
+              <Route path="/league/:leagueId/history" element={<LeagueHistory />} />
+              <Route path="/mobile-app" element={<MobileApp />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */>
               <Route path="*" element={<NotFound />} />
             </Routes>

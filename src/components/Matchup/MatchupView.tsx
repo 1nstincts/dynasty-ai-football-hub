@@ -1,10 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, PieChart } from 'lucide-react';
 import { MatchupService } from '@/services/MatchupService';
 import { Matchup } from '@/store/slices/matchupsSlice';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
+import { Button } from '@/components/ui/button';
 
 interface MatchupViewProps {
   leagueId: string;
@@ -17,6 +19,7 @@ const MatchupView: React.FC<MatchupViewProps> = ({ leagueId, week, onChangeWeek 
   const [isLoading, setIsLoading] = useState(true);
   const [maxWeek, setMaxWeek] = useState(17); // Default to 17 weeks
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchMatchups = async () => {
@@ -163,9 +166,18 @@ const MatchupView: React.FC<MatchupViewProps> = ({ leagueId, week, onChangeWeek 
               </div>
 
               <div className="border-t border-sleeper-dark mt-2 pt-2 text-xs text-sleeper-gray px-4 pb-2">
-                <div className="flex justify-between">
-                  <span>Yet to play (2 QB, 2 RB, 3 WR, TE, K, DEF)</span>
-                  <span>Yet to play (2 QB, 2 RB, 3 WR, TE, K, DEF)</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs">Yet to play (2 QB, 2 RB, 3 WR, TE, K, DEF)</span>
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    className="flex items-center text-xs gap-1 hover:text-sleeper-accent"
+                    onClick={() => navigate(`/league/${leagueId}/matchup-forecast/${matchup.id}`)}
+                  >
+                    <PieChart className="h-3 w-3" />
+                    Forecast
+                  </Button>
+                  <span className="text-xs">Yet to play (2 QB, 2 RB, 3 WR, TE, K, DEF)</span>
                 </div>
               </div>
             </div>

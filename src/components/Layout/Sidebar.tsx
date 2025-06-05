@@ -16,7 +16,14 @@ import {
   Calculator,
   Calendar,
   TrendingDown,
-  Brain
+  Brain,
+  Timer,
+  Clipboard,
+  FileText,
+  DollarSign,
+  Globe,
+  PieChart,
+  Smartphone
 } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
@@ -110,6 +117,49 @@ const Sidebar: React.FC = () => {
           <Link to="/player-comparison" className="flex items-center p-2 rounded hover:bg-sleeper-darker">
             <BarChart2 className="mr-2 h-5 w-5 text-sleeper-gray" />
             <span className="text-sleeper-gray">Player Comparison</span>
+          </Link>
+          <Link to="/dynasty-window" className="flex items-center p-2 rounded hover:bg-sleeper-darker">
+            <Timer className="mr-2 h-5 w-5 text-sleeper-gray" />
+            <span className="text-sleeper-gray">Dynasty Window</span>
+          </Link>
+          <Link to="/draft-war-room" className="flex items-center p-2 rounded hover:bg-sleeper-darker">
+            <Clipboard className="mr-2 h-5 w-5 text-sleeper-gray" />
+            <span className="text-sleeper-gray">Draft War Room</span>
+          </Link>
+          <Link to="/league-rules-analysis" className="flex items-center p-2 rounded hover:bg-sleeper-darker">
+            <FileText className="mr-2 h-5 w-5 text-sleeper-gray" />
+            <span className="text-sleeper-gray">Rules Analysis</span>
+          </Link>
+          <Link to="/contract-management" className="flex items-center p-2 rounded hover:bg-sleeper-darker">
+            <DollarSign className="mr-2 h-5 w-5 text-sleeper-gray" />
+            <span className="text-sleeper-gray">Salary Cap</span>
+          </Link>
+          <Link to="/social" className="flex items-center p-2 rounded hover:bg-sleeper-darker">
+            <Globe className="mr-2 h-5 w-5 text-sleeper-gray" />
+            <span className="text-sleeper-gray">Community Hub</span>
+          </Link>
+          {leagues.length > 0 && (
+            <div className="group relative">
+              <div className="flex items-center p-2 rounded hover:bg-sleeper-darker cursor-pointer">
+                <PieChart className="mr-2 h-5 w-5 text-sleeper-gray" />
+                <span className="text-sleeper-gray">Matchup Forecast</span>
+              </div>
+              <div className="absolute left-full top-0 ml-2 w-48 bg-sleeper-dark border border-border rounded shadow-lg hidden group-hover:block z-10">
+                {leagues.map(league => (
+                  <Link 
+                    key={`forecast-${league.id}`}
+                    to={`/league/${league.id}`} 
+                    className="block p-2 hover:bg-sleeper-darker text-sleeper-gray"
+                  >
+                    {league.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+          <Link to="/mobile-app" className="flex items-center p-2 rounded hover:bg-sleeper-darker">
+            <Smartphone className="mr-2 h-5 w-5 text-sleeper-gray" />
+            <span className="text-sleeper-gray">Mobile App</span>
           </Link>
         </div>
       </div>
