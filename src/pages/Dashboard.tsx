@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store';
-import { Plus, Search, TrendingUp, Trophy, Newspaper, BarChart3 } from 'lucide-react';
+import { Plus, Search, TrendingUp, Trophy, Newspaper, BarChart3, ExternalLink } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LeagueService } from '@/services/LeagueService';
@@ -205,6 +205,16 @@ const Dashboard = () => {
               </div>
               <h3 className="text-lg font-semibold mb-2">Trade Analyzer</h3>
               <p className="text-sm text-sleeper-gray">Evaluate trades and analyze their impact on your team</p>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-sleeper-accent border-sleeper-accent hover:border-sleeper-primary transition-colors cursor-pointer" onClick={() => navigate('/new-features')}>
+            <CardContent className="pt-6 flex flex-col items-center text-center">
+              <div className="w-12 h-12 rounded-full bg-sleeper-dark flex items-center justify-center mb-4">
+                <ExternalLink className="h-6 w-6 text-sleeper-accent" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2 text-sleeper-dark">New Features</h3>
+              <p className="text-sm text-sleeper-dark">Explore all our latest dynasty fantasy football tools</p>
             </CardContent>
           </Card>
         </div>
