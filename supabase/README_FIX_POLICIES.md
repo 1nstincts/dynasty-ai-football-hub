@@ -121,3 +121,21 @@ WHERE count > 1;
 This query should return no rows, indicating there are no duplicate policies for any role/action combination.
 
 For a complete verification, see the `verify_policy_removal.sql` script in the supabase directory.
+
+## Preventing Future Duplicate Policies
+
+To prevent duplicate policies in the future:
+
+1. Use migration scripts that first check if a policy exists before creating it
+2. Always use DROP POLICY IF EXISTS before CREATE POLICY in migration scripts
+3. Add comments in your SQL files noting which policies already exist
+
+Example pattern for future migrations:
+```sql
+-- First remove any existing policy with this name
+DROP POLICY IF EXISTS "Policy Name" ON table_name;
+-- Then create the policy
+CREATE POLICY "Policy Name" ON table_name FOR action USING (condition);
+```
+
+Additionally, consider reviewing all RLS policies periodically to ensure no duplicates have been accidentally created.
