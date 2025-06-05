@@ -31,6 +31,7 @@ import SocialHub from "./pages/SocialHub";
 import MatchupForecast from "./pages/MatchupForecast";
 import LeagueHistory from "./pages/LeagueHistory";
 import MobileApp from "./pages/MobileApp";
+import NewFeatures from "./pages/NewFeatures";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -74,6 +75,7 @@ const App = () => (
               <Route path="/league/:leagueId/matchup-forecast/:matchupId" element={<MatchupForecast />} />
               <Route path="/league/:leagueId/history" element={<LeagueHistory />} />
               <Route path="/mobile-app" element={<MobileApp />} />
+              <Route path="/new-features" element={<NewFeatures />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */>
               <Route path="*" element={<NotFound />} />
             </Routes>
