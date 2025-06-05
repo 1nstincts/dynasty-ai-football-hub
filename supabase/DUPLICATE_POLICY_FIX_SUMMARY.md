@@ -4,7 +4,12 @@ This document provides a comprehensive overview of the process to identify, fix,
 
 ## Problem Background
 
-Duplicate RLS policies were detected on the `players` table, specifically for the policy named "Enable read access for all users". This caused unpredictable behavior in the application's data access patterns and potentially exposed data incorrectly.
+Duplicate RLS policies were detected on multiple tables in the application:
+
+1. `players` table: Duplicate policies for the policy named "Enable read access for all users"
+2. `team_rosters` table: Multiple permissive policies for role `anon` for action `SELECT`, specifically {"Allow all to manage team rosters","Allow all to read team rosters"}
+
+These duplicate policies caused performance issues because Supabase must execute multiple policies for every query, and potentially created unpredictable behavior in data access patterns.
 
 ## Solution Process
 
@@ -51,9 +56,10 @@ The fix is considered successful when:
 
 | File | Purpose |
 |------|---------|
-| `supabase/fix_duplicate_policy.sql` | Main SQL script to remove duplicate policies |
-| `supabase/README_FIX_POLICIES.md` | Instructions for applying the fix |
-| `supabase/verify_policy_removal.sql` | SQL queries to verify fix success |
+| `supabase/fix_duplicate_policy.sql` | SQL script to remove duplicate policies on players table |
+| `supabase/fix_team_rosters_policy.sql` | SQL script to fix team_rosters table policies |
+| `supabase/README_FIX_POLICIES.md` | Instructions for applying the fixes |
+| `supabase/verify_policy_removal.sql` | SQL queries to verify fix success for all tables |
 | `supabase/VERIFY_POLICY_INSTRUCTIONS.md` | Detailed verification instructions |
 | `scripts/verify-policy-removal.mjs` | Node.js script for programmatic verification |
 | `supabase/DUPLICATE_POLICY_FIX_SUMMARY.md` | This summary document |
