@@ -152,19 +152,30 @@ const Dashboard = () => {
 
   return (
     <div className="max-w-5xl mx-auto p-6">
+      {/* HUGE BANNER FOR NEW FEATURES */}
+      <div className="w-full bg-sleeper-accent mb-8 p-6 rounded-lg shadow-lg">
+        <div className="flex flex-col md:flex-row items-center justify-between">
+          <div className="text-sleeper-dark mb-4 md:mb-0">
+            <h2 className="text-3xl font-bold">NEW FEATURES ADDED!</h2>
+            <p className="text-xl font-semibold">Check out all our new dynasty fantasy football tools</p>
+          </div>
+          <Button 
+            size="lg" 
+            className="bg-sleeper-dark hover:bg-sleeper-darker text-white font-bold text-lg px-8 py-6"
+            onClick={() => navigate('/new-features')}
+          >
+            <ExternalLink className="h-5 w-5 mr-2" />
+            VIEW NEW FEATURES
+          </Button>
+        </div>
+      </div>
+      
       <div className="mb-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold mb-2">Fantasy Football Hub</h1>
             <p className="text-sleeper-gray">Manage your dynasty leagues, check player stats, and make strategic moves all in one place.</p>
           </div>
-          <Button 
-            className="mt-4 md:mt-0 bg-sleeper-accent text-sleeper-dark hover:bg-sleeper-accent/90 font-bold"
-            size="lg"
-            onClick={() => navigate('/new-features')}
-          >
-            Explore New Features
-          </Button>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
