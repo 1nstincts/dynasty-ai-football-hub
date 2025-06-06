@@ -12,7 +12,7 @@ WITH role_cmd_counts AS (
   SELECT 
     schemaname,
     tablename,
-    roles::text,
+    roles::text as roles,
     cmd,
     COUNT(*) as policy_count
   FROM pg_policies 
@@ -27,22 +27,44 @@ SELECT * FROM duplicate_policy_report;
 
 -- Step 2: Get detailed information about the duplicate policies
 DROP TABLE IF EXISTS duplicate_policies_detail;
-CREATE TEMP TABLE duplicate_policies_detail AS
-SELECT 
-  pol.schemaname,
-  pol.tablename, 
-  pol.policyname,
-  pol.permissive,
-  pol.roles::text,
-  pol.cmd,
-  pol.qual,
-  pol.with_check
-FROM pg_policies pol
-JOIN duplicate_policy_report dpr 
-  ON pol.tablename = dpr.tablename 
-  AND pol.roles::text = dpr.roles 
-  AND pol.cmd = dpr.cmd
-ORDER BY pol.schemaname, pol.tablename, pol.roles, pol.cmd, pol.policyname;
+
+-- Make sure the temporary table exists before trying to join with it
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'duplicate_policy_report') THEN
+    CREATE TEMP TABLE duplicate_policies_detail AS
+    SELECT 
+      pol.schemaname,
+      pol.tablename, 
+      pol.policyname,
+      pol.permissive,
+      pol.roles::text,
+      pol.cmd,
+      pol.qual,
+      pol.with_check
+    FROM pg_policies pol
+    JOIN duplicate_policy_report dpr 
+      ON pol.tablename = dpr.tablename 
+      AND pol.roles::text = dpr.roles 
+      AND pol.cmd = dpr.cmd
+    ORDER BY pol.schemaname, pol.tablename, pol.roles, pol.cmd, pol.policyname;
+  ELSE
+    -- Create an empty table with the same structure if no duplicates found
+    CREATE TEMP TABLE duplicate_policies_detail AS
+    SELECT 
+      pol.schemaname,
+      pol.tablename, 
+      pol.policyname,
+      pol.permissive,
+      pol.roles::text,
+      pol.cmd,
+      pol.qual,
+      pol.with_check
+    FROM pg_policies pol
+    WHERE 1=0; -- Empty result set
+  END IF;
+END
+$$;
 
 -- Display the detailed policy information
 SELECT * FROM duplicate_policies_detail;
