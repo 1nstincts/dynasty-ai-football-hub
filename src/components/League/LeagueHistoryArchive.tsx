@@ -939,4 +939,5 @@ function getSuffixForNumber(i: number) {
   return 'th';
 }
 
+export { LeagueHistoryArchive };
 export default LeagueHistoryArchive;

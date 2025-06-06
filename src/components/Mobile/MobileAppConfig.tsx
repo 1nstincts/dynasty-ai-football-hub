@@ -755,4 +755,5 @@ const MobileAppConfig: React.FC<MobileAppConfigProps> = ({ className }) => {
   );
 };
 
+export { MobileAppConfig };
 export default MobileAppConfig;
