@@ -1,0 +1,76 @@
+name: Verify Supabase Policies
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  # Allow manual triggering
+  workflow_dispatch:
+
+jobs:
+  verify-policies:
+    name: Check for Duplicate RLS Policies
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Verify Supabase policies
+        run: node scripts/verify-policies-ci.mjs
+        env:
+          CI: true
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          
+      - name: Upload policy verification report
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: policy-verification-report
+          path: policy-verification-report.json
+          
+      - name: Comment on PR with policy issues
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              const reportPath = 'policy-verification-report.json';
+              if (fs.existsSync(reportPath)) {
+                const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+                const duplicates = report.duplicatePolicies;
+                
+                let commentBody = '## ⚠️ Duplicate RLS Policies Detected\n\n';
+                commentBody += 'This PR contains changes that could lead to duplicate RLS policies in Supabase.\n\n';
+                commentBody += '### Affected Tables\n\n';
+                
+                duplicates.forEach(d => {
+                  commentBody += `- **${d.tablename}**: ${d.policy_count} policies for role ${d.roles} and action ${d.cmd}\n`;
+                });
+                
+                commentBody += '\n### Recommendation\n\n';
+                commentBody += 'Consider running the comprehensive policy audit and fix script:\n';
+                commentBody += '```bash\nsupabase sql -f supabase/comprehensive_policy_audit_fix.sql\n```\n';
+                
+                github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: commentBody
+                });
+              }
+            } catch (error) {
+              console.error('Error creating PR comment:', error);
+            }

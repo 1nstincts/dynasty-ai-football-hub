@@ -1,73 +1,108 @@
-# Welcome to your Lovable project
+# Dynasty AI Football Hub
 
-## Project info
+A comprehensive fantasy football platform with AI-powered dynasty analysis tools, player management, and league administration features.
 
-**URL**: https://lovable.dev/projects/35529b62-d12f-4462-9e30-a49f5be77821
+## Project Overview
 
-## How can I edit this code?
+The Dynasty AI Football Hub provides fantasy football enthusiasts with advanced tools for dynasty league management, player valuation, team analysis, and more.
 
-There are several ways of editing your application.
+## Database Policy Management
 
-**Use Lovable**
+The project uses Supabase for the database with Row Level Security (RLS) policies to control data access. We have implemented comprehensive tools to manage and maintain optimal policy configuration.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/35529b62-d12f-4462-9e30-a49f5be77821) and start prompting.
+### Policy Verification
 
-Changes made via Lovable will be committed automatically to this repo.
+To check for duplicate RLS policies in the database:
 
-**Use your preferred IDE**
+```bash
+# Run the verification script
+node scripts/verify-policies-ci.mjs
+```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+This script is also integrated into the CI/CD pipeline to catch policy issues before deployment.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Policy Fixes
 
-Follow these steps:
+If duplicate policies are detected, use one of these solutions:
+
+1. **Targeted Fix**: For specific tables
+   ```bash
+   # Fix players table
+   supabase sql -f supabase/fix_duplicate_policy.sql
+   
+   # Fix team_rosters table
+   supabase sql -f supabase/fix_team_rosters_policy_complete.sql
+   ```
+
+2. **Comprehensive Fix**: For all tables
+   ```bash
+   supabase sql -f supabase/comprehensive_policy_audit_fix.sql
+   ```
+
+### Documentation
+
+For detailed information on policy management, see:
+- `supabase/COMPREHENSIVE_POLICY_AUDIT.md` - Complete audit guide
+- `supabase/TEAM_ROSTERS_POLICY_FIX.md` - Team rosters specific fix
+- `supabase/DUPLICATE_POLICY_FIX_SUMMARY.md` - Overview of all fixes
+
+## Development
+
+### Setup
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Clone the repository
+git clone https://github.com/1nstincts/dynasty-ai-football-hub.git
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Navigate to the project directory
+cd dynasty-ai-football-hub
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Setup environment variables (copy example file)
+cp .env.example .env.local
+# Edit .env.local with your Supabase credentials
+
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Environment Setup
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Create a `.env.local` file with the following variables:
 
-**Use GitHub Codespaces**
+```
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_KEY=your_supabase_service_key
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Prerequisites
 
-## What technologies are used for this project?
+- Node.js 18+ and npm
+- Supabase account with a project set up
+- Supabase CLI (for database migrations and policy management)
+
+## Technology Stack
 
 This project is built with:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **Frontend**: React, TypeScript, Vite
+- **UI**: Tailwind CSS, shadcn/ui components
+- **State Management**: Redux Toolkit
+- **Database**: Supabase (PostgreSQL)
+- **API**: Supabase REST/Realtime
+- **Authentication**: Supabase Auth
+- **Hosting**: Custom deployment
 
-## How can I deploy this project?
+## Features
 
-Simply open [Lovable](https://lovable.dev/projects/35529b62-d12f-4462-9e30-a49f5be77821) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- AI-powered team analysis and recommendations
+- Dynasty value calculator with multi-year projections
+- Advanced player comparison tools
+- Dynasty rankings with customizable metrics
+- Team roster management with contract features
+- Trade analyzer with fairness evaluation
+- League history and standings visualization
+- Rookie and startup draft tools
