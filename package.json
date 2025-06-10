@@ -11,8 +11,9 @@
     "build:ci": "vite build --mode production",
     "lint": "eslint .",
     "preview": "vite preview",
-    "lovable:build": "vite build --mode production",
-    "lovable:preview": "vite preview --port 8080 --host"
+    "lovable:build": "vite build --mode lovable",
+    "lovable:preview": "vite preview --port 3000 --host",
+    "lovable:dev": "LOVABLE=true vite --mode lovable"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
